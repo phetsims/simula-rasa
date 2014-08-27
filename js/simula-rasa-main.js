@@ -3,7 +3,6 @@
 /**
  * Main entry point for the sim.
  *
- * @author Chris Malley (PixelZoom, Inc.)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
@@ -22,7 +21,7 @@ define( function( require ) {
 
       // all credits fields are optional
       leadDesign: 'Groucho',
-      softwareDevelopment: 'Harpo',
+      softwareDevelopment: 'Sam Reid (PhET Interactive Simulations)',
       designTeam: 'Curly, Larry, Mo',
       interviews: 'Wile E. Coyote',
       thanks: 'Thanks to the ACME Dynamite Company for funding this sim!'

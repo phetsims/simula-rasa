@@ -3,7 +3,6 @@
 /**
  * Model for the 'SimulaRasa' screen.
  *
- * @author Chris Malley (PixelZoom, Inc.)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
@@ -13,7 +12,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
 
   /**
-   * Main constructor for SimulaRasaModel, which creates the bar magnet..
+   * Main constructor for SimulaRasaModel, which contains all of the model logic for the entire sim screen.
    * @constructor
    */
   function SimulaRasaModel() {

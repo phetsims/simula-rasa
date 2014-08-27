@@ -1,9 +1,9 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * The 'Bar Magnet' screen. Conforms to the contract specified in joist/Screen.
+ * The 'Simula Rasa' screen, which shows everything in that screen.
  *
- * @author Chris Malley (PixelZoom, Inc.)
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
   'use strict';
@@ -25,7 +25,7 @@ define( function( require ) {
     Screen.call( this, simulaRasaSimString, null /* no icon, single-screen sim */,
       function() { return new SimulaRasaModel(); },
       function( model ) { return new SimulaRasaScreenView( model ); },
-      { backgroundColor: 'rgb(50,50,50)' }
+      { backgroundColor: 'black' }
     );
   }
 

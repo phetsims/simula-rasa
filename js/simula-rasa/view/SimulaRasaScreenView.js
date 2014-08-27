@@ -3,7 +3,6 @@
 /**
  * View for the 'SimulaRasa' screen.
  *
- * @author Chris Malley (PixelZoom, Inc.)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 define( function( require ) {
@@ -17,14 +16,16 @@ define( function( require ) {
   var ResetAllButton = require( 'SCENERY_PHET/ResetAllButton' );
 
   /**
-   * Constructor for the SimulaRasaView, it creates the bar magnet node and control panel node.
-   * @param {BarMagnetModel} model the model for the entire screen
+   * Constructor for the SimulaRasaView
+   * @param {SimulaRasaModel} simulaRasaModel the model for the entire screen
    * @constructor
    */
-  function SimulaRasaView( model ) {
+  function SimulaRasaView( simulaRasaModel ) {
 
     ScreenView.call( this );
 
+    // Create and add the Reset All Button in the bottom right
+    //TODO: Wire up the reset all button to the model's reset function
     this.addChild( new ResetAllButton( { right: this.layoutBounds.maxX - 10, bottom: this.layoutBounds.maxY - 10} ) );
   }
 

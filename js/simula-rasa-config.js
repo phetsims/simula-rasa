@@ -3,7 +3,6 @@
 /**
  * RequireJS configuration file for the sim.
  *
- * @author Chris Malley (PixelZoom, Inc.)
  * @author Sam Reid (PhET Interactive Simulations)
  */
 require.config(
