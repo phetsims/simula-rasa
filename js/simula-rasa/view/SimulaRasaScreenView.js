@@ -10,9 +10,7 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var ModelViewTransform2 = require( 'PHETCOMMON/view/ModelViewTransform2' );
   var ScreenView = require( 'JOIST/ScreenView' );
-  var Vector2 = require( 'DOT/Vector2' );
   var ResetAllButton = require( 'SCENERY_PHET/ResetAllButton' );
 
   /**
