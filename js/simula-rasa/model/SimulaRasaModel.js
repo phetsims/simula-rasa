@@ -25,7 +25,7 @@ define( function( require ) {
     },
 
     // Called by the animation loop. Optional, so if your model has no animation, you can omit this.
-    step: function() {
+    step: function( dt ) {
       // Handle model animation here.
     }
   } );
