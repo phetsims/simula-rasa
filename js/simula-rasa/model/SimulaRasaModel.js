@@ -10,19 +10,18 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
+  var PropertySet = require( 'AXON/PropertySet' );
 
   /**
    * Main constructor for SimulaRasaModel, which contains all of the model logic for the entire sim screen.
    * @constructor
    */
   function SimulaRasaModel() {
+
+    PropertySet.call( this, {} );
   }
 
-  return inherit( Object, SimulaRasaModel, {
-
-    // Resets all model elements
-    reset: function() {
-    },
+  return inherit( PropertySet, SimulaRasaModel, {
 
     // Called by the animation loop. Optional, so if your model has no animation, you can omit this.
     step: function( dt ) {

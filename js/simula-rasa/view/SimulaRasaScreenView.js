@@ -24,8 +24,21 @@ define( function( require ) {
 
     // Create and add the Reset All Button in the bottom right
     //TODO: Wire up the reset all button to the model's reset function
-    this.addChild( new ResetAllButton( { right: this.layoutBounds.maxX - 10, bottom: this.layoutBounds.maxY - 10} ) );
+    var resetAllButton = new ResetAllButton( {
+      listener: function() {
+        simulaRasaModel.reset();
+      },
+      right: this.layoutBounds.maxX - 10,
+      bottom: this.layoutBounds.maxY - 10
+    } );
+    this.addChild( resetAllButton );
   }
 
-  return inherit( ScreenView, SimulaRasaView );
+  return inherit( ScreenView, SimulaRasaView, {
+
+    // Called by the animation loop. Optional, so if your view has no animation, you can omit this.
+    step: function( dt ) {
+      // Handle view animation here.
+    }
+  } );
 } );
