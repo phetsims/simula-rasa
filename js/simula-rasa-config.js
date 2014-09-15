@@ -3,7 +3,7 @@
 /**
  * RequireJS configuration file for the sim.
  *
- * @author Sam Reid (PhET Interactive Simulations)
+ * @author Your Name (Your Affiliation)
  */
 require.config(
   {

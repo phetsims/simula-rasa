@@ -1,9 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * View for the 'SimulaRasa' screen.
  *
- * @author Sam Reid (PhET Interactive Simulations)
+ * @author Your Name (Your Affiliation)
  */
 define( function( require ) {
   'use strict';
@@ -14,16 +13,14 @@ define( function( require ) {
   var ResetAllButton = require( 'SCENERY_PHET/ResetAllButton' );
 
   /**
-   * Constructor for the SimulaRasaView
-   * @param {SimulaRasaModel} simulaRasaModel the model for the entire screen
+   * @param {SimulaRasaModel} simulaRasaModel
    * @constructor
    */
-  function SimulaRasaView( simulaRasaModel ) {
+  function SimulaRasaScreenView( simulaRasaModel ) {
 
     ScreenView.call( this );
 
-    // Create and add the Reset All Button in the bottom right
-    //TODO: Wire up the reset all button to the model's reset function
+    // Create and add the Reset All Button in the bottom right, which resets the model
     var resetAllButton = new ResetAllButton( {
       listener: function() {
         simulaRasaModel.reset();
@@ -34,7 +31,7 @@ define( function( require ) {
     this.addChild( resetAllButton );
   }
 
-  return inherit( ScreenView, SimulaRasaView, {
+  return inherit( ScreenView, SimulaRasaScreenView, {
 
     // Called by the animation loop. Optional, so if your view has no animation, you can omit this.
     step: function( dt ) {

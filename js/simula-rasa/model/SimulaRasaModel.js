@@ -1,9 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * Model for the 'SimulaRasa' screen.
  *
- * @author Sam Reid (PhET Interactive Simulations)
+ * @author Your Name (Your Affiliation)
  */
 define( function( require ) {
   'use strict';

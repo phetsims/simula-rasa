@@ -3,7 +3,7 @@
 /**
  * Main entry point for the sim.
  *
- * @author Sam Reid (PhET Interactive Simulations)
+ * @author Your Name (Your Affiliation)
  */
 define( function( require ) {
   'use strict';
@@ -21,7 +21,7 @@ define( function( require ) {
 
       // all credits fields are optional
       leadDesign: 'Groucho',
-      softwareDevelopment: 'Sam Reid (PhET Interactive Simulations)',
+      softwareDevelopment: 'Your Name (Your Affiliation)',
       designTeam: 'Curly, Larry, Moe',
       interviews: 'Wile E. Coyote',
       thanks: 'Thanks to the ACME Dynamite Company for funding this sim!'

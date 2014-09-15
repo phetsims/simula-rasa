@@ -1,9 +1,8 @@
 //  Copyright 2002-2014, University of Colorado Boulder
 
 /**
- * The 'Simula Rasa' screen, which shows everything in that screen.
  *
- * @author Sam Reid (PhET Interactive Simulations)
+ * @author Your Name (Your Affiliation)
  */
 define( function( require ) {
   'use strict';
@@ -18,14 +17,18 @@ define( function( require ) {
   var simulaRasaSimString = require( 'string!SIMULA_RASA/simula-rasa.name' );
 
   /**
-   * Creates the model and view for the SimulaRasaScreen
    * @constructor
    */
   function SimulaRasaScreen() {
-    Screen.call( this, simulaRasaSimString, null /* no icon, single-screen sim */,
+
+    //If this is a single-screen sim, then no icon is necessary.
+    //If there are multiple screens, then the icon must be provided here.
+    var icon = null;
+
+    Screen.call( this, simulaRasaSimString, icon,
       function() { return new SimulaRasaModel(); },
       function( model ) { return new SimulaRasaScreenView( model ); },
-      { backgroundColor: 'black' }
+      { backgroundColor: 'white' }
     );
   }
 
