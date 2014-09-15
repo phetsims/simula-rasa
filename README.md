@@ -7,5 +7,5 @@ To create a sim based on this template, clone this and the other PhET libraries 
 ```
 cd simula-rasa
 npm install
-grunt create-sim --name=project-name --author="Your Name (Your Affiliation)
+grunt create-sim --name=project-name --author="Your Name (Your Affiliation)"
 ```
