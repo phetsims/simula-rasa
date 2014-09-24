@@ -18,13 +18,13 @@ define( function( require ) {
 
   var simOptions = {
     credits: {
-
-      // all credits fields are optional
-      leadDesign: 'Groucho',
-      softwareDevelopment: 'Your Name (Your Affiliation)',
-      designTeam: 'Curly, Larry, Moe',
-      interviews: 'Wile E. Coyote',
-      thanks: 'Thanks to the ACME Dynamite Company for funding this sim!'
+      //TODO fill in proper credits, all of these fields are optional, see joist.AboutDialog
+      leadDesign: '',
+      softwareDevelopment: '',
+      team: '',
+      qualityAssurance: '',
+      graphicArts: '',
+      thanks: ''
     }
   };
 
