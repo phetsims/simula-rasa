@@ -12,7 +12,6 @@ define( function( require ) {
   var PropertySet = require( 'AXON/PropertySet' );
 
   /**
-   * Main constructor for SimulaRasaModel, which contains all of the model logic for the entire sim screen.
    * @constructor
    */
   function SimulaRasaModel() {
