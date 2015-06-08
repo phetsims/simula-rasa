@@ -20,7 +20,7 @@ define( function( require ) {
 
     ScreenView.call( this );
 
-    // Create and add the Reset All Button in the bottom right, which resets the model
+    // Reset All button
     var resetAllButton = new ResetAllButton( {
       listener: function() {
         simulaRasaModel.reset();
