@@ -33,9 +33,9 @@ define( function( require ) {
 
   return inherit( ScreenView, SimulaRasaScreenView, {
 
-    // Called by the animation loop. Optional, so if your view has no animation, you can omit this.
+    //TODO Called by the animation loop. Optional, so if your view has no animation, please delete this.
     step: function( dt ) {
-      // Handle view animation here.
+      //TODO Handle view animation here.
     }
   } );
 } );

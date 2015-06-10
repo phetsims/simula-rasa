@@ -21,9 +21,9 @@ define( function( require ) {
 
   return inherit( PropertySet, SimulaRasaModel, {
 
-    // Called by the animation loop. Optional, so if your model has no animation, you can omit this.
+    //TODO Called by the animation loop. Optional, so if your model has no animation, please delete this.
     step: function( dt ) {
-      // Handle model animation here.
+      //TODO Handle model animation here.
     }
   } );
 } );
