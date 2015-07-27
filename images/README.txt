@@ -1,10 +1,12 @@
-Put image files in this directory. Each image must have an entry in license.json.
-If this directory has subdirectories, each subdirectory mut have its own license.json file.
+Image files belong in this directory. Each image must have an entry in license.json which indicates the origin of the
+image as well as its licensing.  If this directory has subdirectories, each subdirectory mut have its own license.json 
+file.  
 
-In license.json, each line consists of the image file name, followed by one or more of the following fields:
+The license.json file should contains one entry per file, and each should be annotated with the following:
 
-  source - where you found the resource (organization, URL, etc.)
-  author - person or organization that created the resource
-  license - the name of license (see PhetRuleSet.java for a list of recognized licenses)
-  licensefile - file that contains the actual license text
-  notes - any misc notes that you want to include
+* text - copyright statement or "Public Domain"
+* projectURL - the URL for the resource
+* license - the name of license, such as "Public Domain"
+* notes - additional helpful information about the resource, or ""
+
+For an example, please see any of the license.json files in a PhET simulation's image directory.
