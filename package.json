@@ -2,6 +2,7 @@
   "name": "simula-rasa",
   "version": "1.0.0-dev.1",
   "license": "GPLv3",
+  "requirejsNamespace": "SIMULA_RASA",
   "simTitleStringKey": "SIMULA_RASA/simula-rasa.name",
   "phetLibs": [
     "simula-rasa"
