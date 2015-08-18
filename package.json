@@ -15,9 +15,6 @@
   },
   "phet": {
     "requirejsNamespace": "SIMULA_RASA",
-    "simTitleStringKey": "SIMULA_RASA/simula-rasa.name",
-    "phetLibs": [
-      "simula-rasa"
-    ]
+    "simTitleStringKey": "SIMULA_RASA/simula-rasa.name"
   }
 }
