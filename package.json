@@ -14,7 +14,6 @@
     "requirejs": "~2.1.8"
   },
   "phet": {
-    "requirejsNamespace": "SIMULA_RASA",
-    "simTitleStringKey": "SIMULA_RASA/simula-rasa.name"
+    "requirejsNamespace": "SIMULA_RASA"
   }
 }
