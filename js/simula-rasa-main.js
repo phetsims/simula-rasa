@@ -14,7 +14,7 @@ define( function( require ) {
   var SimLauncher = require( 'JOIST/SimLauncher' );
 
   // strings
-  var simTitle = require( 'string!SIMULA_RASA/simula-rasa.name' );
+  var simTitle = require( 'string!SIMULA_RASA/simula-rasa.title' );
 
   var simOptions = {
     credits: {

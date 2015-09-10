@@ -14,7 +14,7 @@ define( function( require ) {
   var Screen = require( 'JOIST/Screen' );
 
   // strings
-  var simulaRasaSimString = require( 'string!SIMULA_RASA/simula-rasa.name' );
+  var simulaRasaSimString = require( 'string!SIMULA_RASA/simula-rasa.title' );
 
   /**
    * @constructor
