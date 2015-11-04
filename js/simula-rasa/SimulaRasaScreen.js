@@ -14,7 +14,7 @@ define( function( require ) {
   var Screen = require( 'JOIST/Screen' );
 
   // strings
-  var simulaRasaSimString = require( 'string!SIMULA_RASA/simula-rasa.title' );
+  var simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
 
   /**
    * @constructor
@@ -25,7 +25,7 @@ define( function( require ) {
     //If there are multiple screens, then the icon must be provided here.
     var icon = null;
 
-    Screen.call( this, simulaRasaSimString, icon,
+    Screen.call( this, simulaRasaTitleString, icon,
       function() { return new SimulaRasaModel(); },
       function( model ) { return new SimulaRasaScreenView( model ); },
       { backgroundColor: 'white' }
