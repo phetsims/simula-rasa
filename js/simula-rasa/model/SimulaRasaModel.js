@@ -10,6 +10,7 @@ define( function( require ) {
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
   var PropertySet = require( 'AXON/PropertySet' );
+  var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   /**
    * @constructor
@@ -18,6 +19,8 @@ define( function( require ) {
 
     PropertySet.call( this, {} );
   }
+
+  simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
 
   return inherit( PropertySet, SimulaRasaModel, {
 

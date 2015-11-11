@@ -12,6 +12,7 @@ define( function( require ) {
   var SimulaRasaScreenView = require( 'SIMULA_RASA/simula-rasa/view/SimulaRasaScreenView' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Screen = require( 'JOIST/Screen' );
+  var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   // strings
   var simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
@@ -31,6 +32,8 @@ define( function( require ) {
       { backgroundColor: 'white' }
     );
   }
+
+  simulaRasa.register( 'SimulaRasaScreen', SimulaRasaScreen );
 
   return inherit( Screen, SimulaRasaScreen );
 } );

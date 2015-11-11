@@ -11,6 +11,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var ScreenView = require( 'JOIST/ScreenView' );
   var ResetAllButton = require( 'SCENERY_PHET/buttons/ResetAllButton' );
+  var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   /**
    * @param {SimulaRasaModel} simulaRasaModel
@@ -30,6 +31,8 @@ define( function( require ) {
     } );
     this.addChild( resetAllButton );
   }
+
+  simulaRasa.register( 'SimulaRasaScreenView', SimulaRasaScreenView );
 
   return inherit( ScreenView, SimulaRasaScreenView, {
 
