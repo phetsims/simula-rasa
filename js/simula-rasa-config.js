@@ -6,6 +6,7 @@
  * @author Your Name (Your Affiliation)
  */
 require.config( {
+
   // An array of dependencies to load. Useful when require is defined as a config object before require.js
   // is loaded, and you want to specify dependencies to load as soon as require() is defined.
   deps: [ 'simula-rasa-main' ],
