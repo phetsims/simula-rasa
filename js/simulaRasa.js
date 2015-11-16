@@ -3,7 +3,7 @@
 /**
  * Creates the namespace for this simulation.
  *
- * @author Chris Malley (PixelZoom, Inc.)
+ * @author Your Name (Your Affiliation)
  */
 define( function( require ) {
   'use strict';
