@@ -2,7 +2,7 @@
 
 /**
  *
- * @author Your Name (Your Affiliation)
+ * @author $AUTHOR$
  */
 define( function( require ) {
   'use strict';
