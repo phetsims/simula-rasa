@@ -17,7 +17,9 @@ define( function( require ) {
    */
   function SimulaRasaModel() {
 
-    PropertySet.call( this, {} );
+    PropertySet.call( this, {
+      //TODO
+    } );
   }
 
   simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
@@ -25,6 +27,7 @@ define( function( require ) {
   return inherit( PropertySet, SimulaRasaModel, {
 
     //TODO Called by the animation loop. Optional, so if your model has no animation, please delete this.
+    // @public
     step: function( dt ) {
       //TODO Handle model animation here.
     }
