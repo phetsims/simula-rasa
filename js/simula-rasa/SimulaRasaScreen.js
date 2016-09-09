@@ -14,22 +14,19 @@ define( function( require ) {
   var Screen = require( 'JOIST/Screen' );
   var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
-  // strings
-  var simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
-
   /**
    * @constructor
    */
   function SimulaRasaScreen() {
 
-    //If this is a single-screen sim, then no icon is necessary.
-    //If there are multiple screens, then the icon must be provided here.
-    var icon = null;
+    var options = {
+      backgroundColor: 'white'
+    };
 
-    Screen.call( this, simulaRasaTitleString, icon,
+    Screen.call( this,
       function() { return new SimulaRasaModel(); },
       function( model ) { return new SimulaRasaScreenView( model ); },
-      { backgroundColor: 'white' }
+      options
     );
   }
 
