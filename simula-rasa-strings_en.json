@@ -1,5 +1,5 @@
 {
   "simula-rasa.title": {
-    "value": "$TITLE$"
+    "value": "{{TITLE}}"
   }
 }
