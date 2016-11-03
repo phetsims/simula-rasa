@@ -9,22 +9,23 @@ define( function( require ) {
 
   // modules
   var inherit = require( 'PHET_CORE/inherit' );
-  var PropertySet = require( 'AXON/PropertySet' );
   var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   /**
    * @constructor
    */
   function SimulaRasaModel() {
-
-    PropertySet.call( this, {
-      //TODO
-    } );
+    //TODO
   }
 
   simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
 
-  return inherit( PropertySet, SimulaRasaModel, {
+  return inherit( Object, SimulaRasaModel, {
+
+    // @public resets the model
+    reset: function() {
+      //TODO reset things here
+    },
 
     //TODO Called by the animation loop. Optional, so if your model has no animation, please delete this.
     // @public
