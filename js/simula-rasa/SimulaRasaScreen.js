@@ -13,6 +13,8 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Screen = require( 'JOIST/Screen' );
   var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+  var Property = require( 'AXON/Property' );
+  var Color = require( 'SCENERY/util/Color' );
 
   /**
    * @constructor
@@ -20,7 +22,7 @@ define( function( require ) {
   function SimulaRasaScreen() {
 
     var options = {
-      backgroundColor: 'white'
+      backgroundColorProperty: new Property( Color.toColor( 'white' ) )
     };
 
     Screen.call( this,
