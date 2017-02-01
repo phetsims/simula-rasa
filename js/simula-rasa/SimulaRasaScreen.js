@@ -8,13 +8,12 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var SimulaRasaModel = require( 'SIMULA_RASA/simula-rasa/model/SimulaRasaModel' );
-  var SimulaRasaScreenView = require( 'SIMULA_RASA/simula-rasa/view/SimulaRasaScreenView' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var Property = require( 'AXON/Property' );
   var Screen = require( 'JOIST/Screen' );
   var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
-  var Property = require( 'AXON/Property' );
-  var Color = require( 'SCENERY/util/Color' );
+  var SimulaRasaModel = require( 'SIMULA_RASA/simula-rasa/model/SimulaRasaModel' );
+  var SimulaRasaScreenView = require( 'SIMULA_RASA/simula-rasa/view/SimulaRasaScreenView' );
 
   /**
    * @constructor
@@ -22,7 +21,7 @@ define( function( require ) {
   function SimulaRasaScreen() {
 
     var options = {
-      backgroundColorProperty: new Property( Color.toColor( 'white' ) )
+      backgroundColorProperty: new Property( 'white' )
     };
 
     Screen.call( this,
