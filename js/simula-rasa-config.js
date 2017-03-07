@@ -3,7 +3,7 @@
 /**
  * RequireJS configuration file for the sim.
  *
- * @author $AUTHOR$
+ * @author {{AUTHOR}}
  */
 require.config( {
 

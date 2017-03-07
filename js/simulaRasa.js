@@ -3,7 +3,7 @@
 /**
  * Creates the namespace for this simulation.
  *
- * @author $AUTHOR$
+ * @author {{AUTHOR}}
  */
 define( function( require ) {
   'use strict';

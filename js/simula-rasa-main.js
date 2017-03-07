@@ -3,7 +3,7 @@
 /**
  * Main entry point for the sim.
  *
- * @author $AUTHOR$
+ * @author {{AUTHOR}}
  */
 define( function( require ) {
   'use strict';

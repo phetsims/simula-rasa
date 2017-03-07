@@ -1,8 +1,7 @@
 // Copyright 2014-2015, University of Colorado Boulder
 
 /**
- *
- * @author $AUTHOR$
+ * @author {{AUTHOR}}
  */
 define( function( require ) {
   'use strict';
