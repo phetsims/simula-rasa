@@ -9,9 +9,9 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var SimulaRasaScreen = require( 'SIMULA_RASA/simula-rasa/SimulaRasaScreen' );
   var Sim = require( 'JOIST/Sim' );
   var SimLauncher = require( 'JOIST/SimLauncher' );
+  var SimulaRasaScreen = require( 'SIMULA_RASA/simula-rasa/SimulaRasaScreen' );
 
   // strings
   var simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
