@@ -13,7 +13,8 @@
     "requirejsNamespace": "SIMULA_RASA",
     "runnable": true,
     "supportedBrands": [
-      "phet"
+      "phet",
+      "adapted-from-phet"
     ]
   }
 }
