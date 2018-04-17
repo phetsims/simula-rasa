@@ -15,6 +15,7 @@
     "supportedBrands": [
       "phet",
       "adapted-from-phet"
-    ]
+    ],
+    "simulation": true
   }
 }
