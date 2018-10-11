@@ -29,6 +29,8 @@ define( require => {
     }
   };
 
+  // launch the sim - beware that scenery Image nodes created outside of SimLauncher.launch() will have zero bounds
+  // until the images are fully loaded, see https://github.com/phetsims/coulombs-law/issues/70
   SimLauncher.launch( () => {
     var sim = new Sim( simulaRasaTitleString, [ new SimulaRasaScreen() ], simOptions );
     sim.start();
