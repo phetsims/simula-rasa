@@ -1,35 +1,33 @@
-// Copyright 2014-2017, University of Colorado Boulder
+// Copyright 2014-2018, University of Colorado Boulder
 
 /**
  * @author {{AUTHOR}}
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
   var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   /**
    * @constructor
    */
-  function SimulaRasaModel() {
-    //TODO
-  }
+  class SimulaRasaModel  {
 
-  simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
-
-  return inherit( Object, SimulaRasaModel, {
+    constructor() {
+      //TODO
+    }
 
     // @public resets the model
-    reset: function() {
-      //TODO reset things here
-    },
+    reset() {
+      //TODO Reset things here.
+    }
 
-    //TODO Called by the animation loop. Optional, so if your model has no animation, please delete this.
     // @public
-    step: function( dt ) {
+    step( dt ) {
       //TODO Handle model animation here.
     }
-  } );
+  }
+
+  return simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
 } );

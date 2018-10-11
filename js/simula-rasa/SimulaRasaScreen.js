@@ -1,36 +1,33 @@
-// Copyright 2014-2017, University of Colorado Boulder
+// Copyright 2014-2018, University of Colorado Boulder
 
 /**
  * @author {{AUTHOR}}
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
   var Property = require( 'AXON/Property' );
   var Screen = require( 'JOIST/Screen' );
   var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
   var SimulaRasaModel = require( 'SIMULA_RASA/simula-rasa/model/SimulaRasaModel' );
   var SimulaRasaScreenView = require( 'SIMULA_RASA/simula-rasa/view/SimulaRasaScreenView' );
 
-  /**
-   * @constructor
-   */
-  function SimulaRasaScreen() {
+  class SimulaRasaScreen extends Screen {
 
-    var options = {
-      backgroundColorProperty: new Property( 'white' )
-    };
+    constructor() {
 
-    Screen.call( this,
-      function() { return new SimulaRasaModel(); },
-      function( model ) { return new SimulaRasaScreenView( model ); },
-      options
-    );
+      var options = {
+        backgroundColorProperty: new Property( 'white' )
+      };
+
+      super(
+        () => new SimulaRasaModel(),
+        ( model ) => new SimulaRasaScreenView( model ),
+        options
+      );
+    }
   }
 
-  simulaRasa.register( 'SimulaRasaScreen', SimulaRasaScreen );
-
-  return inherit( Screen, SimulaRasaScreen );
+  return simulaRasa.register( 'SimulaRasaScreen', SimulaRasaScreen );
 } );

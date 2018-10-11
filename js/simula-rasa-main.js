@@ -1,11 +1,11 @@
-// Copyright 2014-2017, University of Colorado Boulder
+// Copyright 2014-2018, University of Colorado Boulder
 
 /**
  * Main entry point for the sim.
  *
  * @author {{AUTHOR}}
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
@@ -18,17 +18,18 @@ define( function( require ) {
 
   var simOptions = {
     credits: {
-      //TODO fill in proper credits, all of these fields are optional, see joist.AboutDialog
+      //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
       leadDesign: '',
       softwareDevelopment: '',
       team: '',
       qualityAssurance: '',
       graphicArts: '',
+      soundDesign: '',
       thanks: ''
     }
   };
 
-  SimLauncher.launch( function() {
+  SimLauncher.launch( () => {
     var sim = new Sim( simulaRasaTitleString, [ new SimulaRasaScreen() ], simOptions );
     sim.start();
   } );
