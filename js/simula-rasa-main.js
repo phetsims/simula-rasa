@@ -9,14 +9,14 @@ define( require => {
   'use strict';
 
   // modules
-  var Sim = require( 'JOIST/Sim' );
-  var SimLauncher = require( 'JOIST/SimLauncher' );
-  var SimulaRasaScreen = require( 'SIMULA_RASA/simula-rasa/SimulaRasaScreen' );
+  const Sim = require( 'JOIST/Sim' );
+  const SimLauncher = require( 'JOIST/SimLauncher' );
+  const SimulaRasaScreen = require( 'SIMULA_RASA/simula-rasa/SimulaRasaScreen' );
 
   // strings
-  var simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
+  const simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
 
-  var simOptions = {
+  const simOptions = {
     credits: {
       //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
       leadDesign: '',
@@ -32,7 +32,7 @@ define( require => {
   // launch the sim - beware that scenery Image nodes created outside of SimLauncher.launch() will have zero bounds
   // until the images are fully loaded, see https://github.com/phetsims/coulombs-law/issues/70
   SimLauncher.launch( () => {
-    var sim = new Sim( simulaRasaTitleString, [ new SimulaRasaScreen() ], simOptions );
+    const sim = new Sim( simulaRasaTitleString, [ new SimulaRasaScreen() ], simOptions );
     sim.start();
   } );
 } );

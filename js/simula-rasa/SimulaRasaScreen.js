@@ -7,17 +7,17 @@ define( require => {
   'use strict';
 
   // modules
-  var Property = require( 'AXON/Property' );
-  var Screen = require( 'JOIST/Screen' );
-  var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
-  var SimulaRasaModel = require( 'SIMULA_RASA/simula-rasa/model/SimulaRasaModel' );
-  var SimulaRasaScreenView = require( 'SIMULA_RASA/simula-rasa/view/SimulaRasaScreenView' );
+  const Property = require( 'AXON/Property' );
+  const Screen = require( 'JOIST/Screen' );
+  const simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+  const SimulaRasaModel = require( 'SIMULA_RASA/simula-rasa/model/SimulaRasaModel' );
+  const SimulaRasaScreenView = require( 'SIMULA_RASA/simula-rasa/view/SimulaRasaScreenView' );
 
   class SimulaRasaScreen extends Screen {
 
     constructor() {
 
-      var options = {
+      const options = {
         backgroundColorProperty: new Property( 'white' )
       };
 

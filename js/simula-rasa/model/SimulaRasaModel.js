@@ -7,7 +7,7 @@ define( require => {
   'use strict';
 
   // modules
-  var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+  const simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   /**
    * @constructor

@@ -7,9 +7,9 @@ define( function( require ) {
   'use strict';
 
   // modules
-  var ResetAllButton = require( 'SCENERY_PHET/buttons/ResetAllButton' );
-  var ScreenView = require( 'JOIST/ScreenView' );
-  var simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+  const ResetAllButton = require( 'SCENERY_PHET/buttons/ResetAllButton' );
+  const ScreenView = require( 'JOIST/ScreenView' );
+  const simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
 
   class SimulaRasaScreenView extends ScreenView {
 
@@ -20,7 +20,7 @@ define( function( require ) {
 
       super();
 
-      var resetAllButton = new ResetAllButton( {
+      const resetAllButton = new ResetAllButton( {
         listener: () => {
           model.reset();
         },
