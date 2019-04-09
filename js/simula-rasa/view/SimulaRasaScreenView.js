@@ -15,8 +15,9 @@ define( function( require ) {
 
     /**
      * @param {SimulaRasaModel} model
+     * @param {Tandem} tandem
      */
-    constructor( model ) {
+    constructor( model, tandem ) {
 
       super();
 
@@ -25,7 +26,8 @@ define( function( require ) {
           model.reset();
         },
         right: this.layoutBounds.maxX - 10,
-        bottom: this.layoutBounds.maxY - 10
+        bottom: this.layoutBounds.maxY - 10,
+        tandem: tandem.createTandem( 'resetAllButton' )
       } );
       this.addChild( resetAllButton );
     }

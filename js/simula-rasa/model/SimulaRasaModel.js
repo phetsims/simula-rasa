@@ -14,7 +14,10 @@ define( require => {
    */
   class SimulaRasaModel  {
 
-    constructor() {
+    /**
+     * @param {Tandem} tandem
+     */
+    constructor( tandem ) {
       //TODO
     }
 

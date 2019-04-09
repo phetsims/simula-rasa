@@ -15,15 +15,19 @@ define( require => {
 
   class SimulaRasaScreen extends Screen {
 
-    constructor() {
+    /**
+     * @param {Tandem} tandem
+     */
+    constructor( tandem ) {
 
       const options = {
-        backgroundColorProperty: new Property( 'white' )
+        backgroundColorProperty: new Property( 'white' ),
+        tandem: tandem
       };
 
       super(
-        () => new SimulaRasaModel(),
-        ( model ) => new SimulaRasaScreenView( model ),
+        () => new SimulaRasaModel( tandem.createTandem( 'model' ) ),
+        ( model ) => new SimulaRasaScreenView( model, tandem.createTandem( 'view' ) ),
         options
       );
     }

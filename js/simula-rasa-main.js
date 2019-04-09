@@ -12,6 +12,7 @@ define( require => {
   const Sim = require( 'JOIST/Sim' );
   const SimLauncher = require( 'JOIST/SimLauncher' );
   const SimulaRasaScreen = require( 'SIMULA_RASA/simula-rasa/SimulaRasaScreen' );
+  const Tandem = require( 'TANDEM/Tandem' );
 
   // strings
   const simulaRasaTitleString = require( 'string!SIMULA_RASA/simula-rasa.title' );
@@ -32,7 +33,9 @@ define( require => {
   // launch the sim - beware that scenery Image nodes created outside of SimLauncher.launch() will have zero bounds
   // until the images are fully loaded, see https://github.com/phetsims/coulombs-law/issues/70
   SimLauncher.launch( () => {
-    const sim = new Sim( simulaRasaTitleString, [ new SimulaRasaScreen() ], simOptions );
+    const sim = new Sim( simulaRasaTitleString, [
+      new SimulaRasaScreen( Tandem.rootTandem.createTandem( 'simulaRasaScreen' ) )
+    ], simOptions );
     sim.start();
   } );
 } );
