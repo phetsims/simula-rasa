@@ -11,12 +11,12 @@
   },
   "phet": {
     "requirejsNamespace": "SIMULA_RASA",
+    "simulation": true,
     "runnable": true,
     "supportedBrands": [
       "phet",
       "adapted-from-phet"
-    ],
-    "simulation": true
+    ]
   },
   "eslintConfig": {
     "extends": "../chipper/eslint/sim_es6_eslintrc.js"
