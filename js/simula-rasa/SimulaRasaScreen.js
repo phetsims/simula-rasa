@@ -27,7 +27,7 @@ define( require => {
 
       super(
         () => new SimulaRasaModel( tandem.createTandem( 'model' ) ),
-        ( model ) => new SimulaRasaScreenView( model, tandem.createTandem( 'view' ) ),
+        model => new SimulaRasaScreenView( model, tandem.createTandem( 'view' ) ),
         options
       );
     }
