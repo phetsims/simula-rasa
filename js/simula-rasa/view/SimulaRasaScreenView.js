@@ -24,6 +24,7 @@ define( function( require ) {
       const resetAllButton = new ResetAllButton( {
         listener: () => {
           model.reset();
+          this.reset();
         },
         right: this.layoutBounds.maxX - 10,
         bottom: this.layoutBounds.maxY - 10,
@@ -35,6 +36,11 @@ define( function( require ) {
     // @public
     step( dt ) {
       //TODO Handle view animation here.
+    }
+
+    // @public
+    reset() {
+      //TODO reset view-specific stuff here
     }
   }
 
