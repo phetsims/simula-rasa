@@ -21,14 +21,21 @@ define( require => {
       //TODO
     }
 
-    // @public resets the model
+    /**
+     * Resets the model.
+     * @public
+     */
     reset() {
-      //TODO Reset things here.
+      //TODO
     }
 
-    // @public
+    /**
+     * Steps the model.
+     * @param {number} dt - time step, in seconds
+     * @public
+     */
     step( dt ) {
-      //TODO Handle model animation here.
+      //TODO
     }
   }
 

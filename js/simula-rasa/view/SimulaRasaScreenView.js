@@ -10,6 +10,7 @@ define( require => {
   const ResetAllButton = require( 'SCENERY_PHET/buttons/ResetAllButton' );
   const ScreenView = require( 'JOIST/ScreenView' );
   const simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+  const SimulaRasaConstants = require( 'SIMULA_RASA/common/SimulaRasaConstants' );
 
   class SimulaRasaScreenView extends ScreenView {
 
@@ -26,21 +27,28 @@ define( require => {
           model.reset();
           this.reset();
         },
-        right: this.layoutBounds.maxX - 10,
-        bottom: this.layoutBounds.maxY - 10,
+        right: this.layoutBounds.maxX - SimulaRasaConstants.SCREEN_VIEW_X_MARGIN,
+        bottom: this.layoutBounds.maxY - SimulaRasaConstants.SCREEN_VIEW_Y_MARGIN,
         tandem: tandem.createTandem( 'resetAllButton' )
       } );
       this.addChild( resetAllButton );
     }
 
-    // @public
-    step( dt ) {
-      //TODO Handle view animation here.
+    /**
+     * Resets the view.
+     * @public
+     */
+    reset() {
+      //TODO
     }
 
-    // @public
-    reset() {
-      //TODO reset view-specific stuff here
+    /**
+     * Steps the view.
+     * @param {number} dt - time step, in seconds
+     * @public
+     */
+    step( dt ) {
+      //TODO
     }
   }
 
