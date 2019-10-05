@@ -20,7 +20,9 @@ define( require => {
      */
     constructor( model, tandem ) {
 
-      super();
+      super( {
+        tandem: tandem
+      } );
 
       const resetAllButton = new ResetAllButton( {
         listener: () => {
