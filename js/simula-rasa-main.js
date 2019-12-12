@@ -34,7 +34,7 @@ define( require => {
   // until the images are fully loaded, see https://github.com/phetsims/coulombs-law/issues/70
   SimLauncher.launch( () => {
     const sim = new Sim( simulaRasaTitleString, [
-      new SimulaRasaScreen( Tandem.rootTandem.createTandem( 'simulaRasaScreen' ) )
+      new SimulaRasaScreen( Tandem.ROOT.createTandem( 'simulaRasaScreen' ) )
     ], simOptions );
     sim.start();
   } );
