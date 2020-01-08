@@ -1,7 +1,7 @@
 // Copyright 2019, University of Colorado Boulder
 
 /**
- * Constants used in multiple locations within this simulation.
+ * Constants used throughout this simulation.
  *
  * @author {{AUTHOR}}
  */
