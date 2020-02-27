@@ -5,19 +5,16 @@
  *
  * @author {{AUTHOR}}
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+import simulaRasa from '../simulaRasa.js';
 
-  const SimulaRasaConstants = {
+const SimulaRasaConstants = {
 
-    SCREEN_VIEW_X_MARGIN: 15,
-    SCREEN_VIEW_Y_MARGIN: 15
+  SCREEN_VIEW_X_MARGIN: 15,
+  SCREEN_VIEW_Y_MARGIN: 15
 
-    //TODO
-  };
+  //TODO
+};
 
-  return simulaRasa.register( 'SimulaRasaConstants', SimulaRasaConstants );
-} );
+simulaRasa.register( 'SimulaRasaConstants', SimulaRasaConstants );
+export default SimulaRasaConstants;

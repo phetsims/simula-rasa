@@ -3,41 +3,38 @@
 /**
  * @author {{AUTHOR}}
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const simulaRasa = require( 'SIMULA_RASA/simulaRasa' );
+import simulaRasa from '../../simulaRasa.js';
+
+/**
+ * @constructor
+ */
+class SimulaRasaModel {
 
   /**
-   * @constructor
+   * @param {Tandem} tandem
    */
-  class SimulaRasaModel  {
-
-    /**
-     * @param {Tandem} tandem
-     */
-    constructor( tandem ) {
-      //TODO
-    }
-
-    /**
-     * Resets the model.
-     * @public
-     */
-    reset() {
-      //TODO
-    }
-
-    /**
-     * Steps the model.
-     * @param {number} dt - time step, in seconds
-     * @public
-     */
-    step( dt ) {
-      //TODO
-    }
+  constructor( tandem ) {
+    //TODO
   }
 
-  return simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
-} );
+  /**
+   * Resets the model.
+   * @public
+   */
+  reset() {
+    //TODO
+  }
+
+  /**
+   * Steps the model.
+   * @param {number} dt - time step, in seconds
+   * @public
+   */
+  step( dt ) {
+    //TODO
+  }
+}
+
+simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
+export default SimulaRasaModel;
