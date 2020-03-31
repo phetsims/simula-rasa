@@ -9,7 +9,7 @@
 import Sim from '../../joist/js/Sim.js';
 import SimLauncher from '../../joist/js/SimLauncher.js';
 import Tandem from '../../tandem/js/Tandem.js';
-import simulaRasaStrings from './simula-rasa-strings.js';
+import simulaRasaStrings from './simulaRasaStrings.js';
 import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
 
 const simulaRasaTitleString = simulaRasaStrings[ 'simula-rasa' ].title;
