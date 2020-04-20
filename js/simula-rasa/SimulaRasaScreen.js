@@ -18,6 +18,7 @@ class SimulaRasaScreen extends Screen {
   constructor( tandem ) {
 
     const options = {
+      //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
       backgroundColorProperty: new Property( 'white' ),
       tandem: tandem
     };
