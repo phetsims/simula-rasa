@@ -4,6 +4,7 @@
  * @author {{AUTHOR}}
  */
 
+import Tandem from '../../../../tandem/js/Tandem.js';
 import simulaRasa from '../../simulaRasa.js';
 
 /**
@@ -15,6 +16,7 @@ class SimulaRasaModel {
    * @param {Tandem} tandem
    */
   constructor( tandem ) {
+    assert && assert( tandem instanceof Tandem, 'invalid tandem' );
     //TODO
   }
 

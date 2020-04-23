@@ -6,8 +6,10 @@
 
 import ScreenView from '../../../../joist/js/ScreenView.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
 import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
 import simulaRasa from '../../simulaRasa.js';
+import SimulaRasaModel from '../model/SimulaRasaModel.js';
 
 class SimulaRasaScreenView extends ScreenView {
 
@@ -16,6 +18,8 @@ class SimulaRasaScreenView extends ScreenView {
    * @param {Tandem} tandem
    */
   constructor( model, tandem ) {
+    assert && assert( model instanceof SimulaRasaModel, 'invalid model' );
+    assert && assert( tandem instanceof Tandem, 'invalid tandem' );
 
     super( {
       tandem: tandem
