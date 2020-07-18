@@ -9,14 +9,15 @@
 import Sim from '../../joist/js/Sim.js';
 import simLauncher from '../../joist/js/simLauncher.js';
 import Tandem from '../../tandem/js/Tandem.js';
-import simulaRasaStrings from './simulaRasaStrings.js';
 import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
+import simulaRasaStrings from './simulaRasaStrings.js';
 
 const simulaRasaTitleString = simulaRasaStrings[ 'simula-rasa' ].title;
 
 const simOptions = {
+
+  //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
   credits: {
-    //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
     leadDesign: '',
     softwareDevelopment: '',
     team: '',
