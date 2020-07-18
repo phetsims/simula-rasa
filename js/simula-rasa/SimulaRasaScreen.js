@@ -4,8 +4,8 @@
  * @author {{AUTHOR}}
  */
 
-import Property from '../../../axon/js/Property.js';
 import Screen from '../../../joist/js/Screen.js';
+import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
@@ -19,7 +19,7 @@ class SimulaRasaScreen extends Screen {
 
     const options = {
       //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
-      backgroundColorProperty: new Property( 'white' ),
+      backgroundColorProperty: SimulaRasaColors.SCREEN_VIEW_BACKGROUND,
       tandem: tandem
     };
 
