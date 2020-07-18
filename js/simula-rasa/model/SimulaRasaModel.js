@@ -7,9 +7,6 @@
 import Tandem from '../../../../tandem/js/Tandem.js';
 import simulaRasa from '../../simulaRasa.js';
 
-/**
- * @constructor
- */
 class SimulaRasaModel {
 
   /**
