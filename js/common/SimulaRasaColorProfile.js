@@ -8,16 +8,16 @@
  * @author {{AUTHOR}}
  */
 
-import ColorProfile from '../../../scenery-phet/js/ColorProfile.js';
+import ProfileColorProperty from '../../../scenery/js/util/ProfileColorProperty.js';
 import simulaRasa from '../simulaRasa.js';
 
-const SimulaRasaColorProfile = new ColorProfile( [ 'default' ], {
+const SimulaRasaColorProfile = {
 
   // Background color that for screens in this sim
-  screenBackgroundColor: {
+  screenBackgroundColorProperty: new ProfileColorProperty( 'background', {
     default: 'white'
-  }
-} );
+  } )
+};
 
 simulaRasa.register( 'SimulaRasaColorProfile', SimulaRasaColorProfile );
 export default SimulaRasaColorProfile;
