@@ -5,7 +5,7 @@
  */
 
 import Screen from '../../../joist/js/Screen.js';
-import SimulaRasaColorProfile from '../common/SimulaRasaColorProfile.js';
+import simulaRasaColorProfie from '../common/simulaRasaColorProfie.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
@@ -19,7 +19,7 @@ class SimulaRasaScreen extends Screen {
 
     const options = {
       //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
-      backgroundColorProperty: SimulaRasaColorProfile.screenBackgroundColorProperty,
+      backgroundColorProperty: simulaRasaColorProfie.screenBackgroundColorProperty,
       tandem: tandem
     };
 
