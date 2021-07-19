@@ -13,7 +13,6 @@
     "requirejsNamespace": "SIMULA_RASA",
     "simulation": true,
     "runnable": true,
-    "colorProfile": true,
     "readmeCreatedManually": true,
     "supportedBrands": [
       "phet",
