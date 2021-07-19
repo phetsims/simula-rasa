@@ -2,7 +2,8 @@
 
 /**
  * simulaRasaColorProfile defines the color profile for this sim.
- * All simulations are required to have a ColorProfile, even if they only have the 'default' profile.
+ * All simulations are required to have a color file, even if they only have the 'default' profile.
+ * TODO: https://github.com/phetsims/scenery-phet/issues/515 decide the name for this color file
  * See https://github.com/phetsims/scenery-phet/issues/642.
  *
  * @author {{AUTHOR}}
