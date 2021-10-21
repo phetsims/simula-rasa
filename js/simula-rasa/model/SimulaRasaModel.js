@@ -6,7 +6,7 @@
  * @author {{AUTHOR}}
  */
 
-import merge from '../../../../chipper/dist/phet-core/js/merge.js';
+import merge from '../../../../phet-core/js/merge.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import simulaRasa from '../../simulaRasa.js';
 

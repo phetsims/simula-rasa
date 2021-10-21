@@ -6,8 +6,8 @@
  * @author {{AUTHOR}}
  */
 
-import merge from '../../../../chipper/dist/phet-core/js/merge.js';
 import ScreenView from '../../../../joist/js/ScreenView.js';
+import merge from '../../../../phet-core/js/merge.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
