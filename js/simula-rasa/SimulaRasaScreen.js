@@ -1,9 +1,12 @@
 // Copyright 2014-2021, University of Colorado Boulder
 
 /**
+ * TODO Describe this class and its responsibilities.
+ *
  * @author {{AUTHOR}}
  */
 
+import Tandem from '../../../chipper/dist/tandem/js/Tandem.js';
 import Screen from '../../../joist/js/Screen.js';
 import simulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
@@ -13,19 +16,21 @@ import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
 class SimulaRasaScreen extends Screen {
 
   /**
-   * @param {Tandem} tandem
+   * @param {Object} [options]
    */
-  constructor( tandem ) {
+  constructor( options ) {
 
-    const options = {
+    options = {
       //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
       backgroundColorProperty: simulaRasaColors.screenBackgroundColorProperty,
-      tandem: tandem
+
+      // phet-io options
+      tandem: Tandem.REQUIRED
     };
 
     super(
-      () => new SimulaRasaModel( tandem.createTandem( 'model' ) ),
-      model => new SimulaRasaScreenView( model, tandem.createTandem( 'view' ) ),
+      () => new SimulaRasaModel( { tandem: options.tandem.createTandem( 'model' ) } ),
+      model => new SimulaRasaScreenView( model, { tandem: options.tandem.createTandem( 'view' ) } ),
       options
     );
   }

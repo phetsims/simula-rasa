@@ -1,19 +1,28 @@
 // Copyright 2014-2020, University of Colorado Boulder
 
 /**
+ * TODO Describe this class and its responsibilities.
+ *
  * @author {{AUTHOR}}
  */
 
+import merge from '../../../../chipper/dist/phet-core/js/merge.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import simulaRasa from '../../simulaRasa.js';
 
 class SimulaRasaModel {
 
   /**
-   * @param {Tandem} tandem
+   * @param {Object} [options]
    */
-  constructor( tandem ) {
-    assert && assert( tandem instanceof Tandem, 'invalid tandem' );
+  constructor( options ) {
+
+    options = merge( {
+
+      // phet-io options
+      tandem: Tandem.REQUIRED
+    }, options );
+
     //TODO
   }
 

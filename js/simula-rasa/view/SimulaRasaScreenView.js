@@ -1,9 +1,12 @@
 // Copyright 2014-2020, University of Colorado Boulder
 
 /**
+ * TODO Describe this class and its responsibilities.
+ *
  * @author {{AUTHOR}}
  */
 
+import merge from '../../../../chipper/dist/phet-core/js/merge.js';
 import ScreenView from '../../../../joist/js/ScreenView.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
@@ -15,15 +18,18 @@ class SimulaRasaScreenView extends ScreenView {
 
   /**
    * @param {SimulaRasaModel} model
-   * @param {Tandem} tandem
+   * @param {Object} [options]
    */
-  constructor( model, tandem ) {
+  constructor( model, options ) {
     assert && assert( model instanceof SimulaRasaModel, 'invalid model' );
-    assert && assert( tandem instanceof Tandem, 'invalid tandem' );
 
-    super( {
-      tandem: tandem
-    } );
+    options = merge( {
+
+      // phet-io options
+      tandem: Tandem.REQUIRED
+    }, options );
+
+    super( options );
 
     const resetAllButton = new ResetAllButton( {
       listener: () => {
@@ -33,7 +39,7 @@ class SimulaRasaScreenView extends ScreenView {
       },
       right: this.layoutBounds.maxX - SimulaRasaConstants.SCREEN_VIEW_X_MARGIN,
       bottom: this.layoutBounds.maxY - SimulaRasaConstants.SCREEN_VIEW_Y_MARGIN,
-      tandem: tandem.createTandem( 'resetAllButton' )
+      tandem: options.tandem.createTandem( 'resetAllButton' )
     } );
     this.addChild( resetAllButton );
   }

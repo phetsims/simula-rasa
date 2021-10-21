@@ -32,7 +32,7 @@ const simOptions = {
 // until the images are fully loaded, see https://github.com/phetsims/coulombs-law/issues/70
 simLauncher.launch( () => {
   const sim = new Sim( simulaRasaTitleString, [
-    new SimulaRasaScreen( Tandem.ROOT.createTandem( 'simulaRasaScreen' ) )
+    new SimulaRasaScreen( { tandem: Tandem.ROOT.createTandem( 'simulaRasaScreen' ) } )
   ], simOptions );
   sim.start();
 } );
