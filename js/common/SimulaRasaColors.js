@@ -14,7 +14,7 @@
  * @author {{AUTHOR}}
  */
 
-import ProfileColorProperty from '../../../scenery/js/util/ProfileColorProperty.js';
+import { ProfileColorProperty } from '../../../scenery/js/imports.js';
 import simulaRasa from '../simulaRasa.js';
 
 const simulaRasaColors = {
