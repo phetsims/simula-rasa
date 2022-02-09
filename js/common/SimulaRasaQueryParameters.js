@@ -24,6 +24,6 @@ simulaRasa.register( 'SimulaRasaQueryParameters', SimulaRasaQueryParameters );
 // Log query parameters
 logGlobal( 'phet.chipper.queryParameters' );
 logGlobal( 'phet.preloads.phetio.queryParameters' );
-logGlobal( 'phet.naturalSelection.SimulaRasaQueryParameters' );
+logGlobal( 'phet.simulaRasa.SimulaRasaQueryParameters' );
 
 export default SimulaRasaQueryParameters;
