@@ -1,4 +1,4 @@
-// Copyright 2019-2021, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * Defines query parameters that are specific to this simulation.
