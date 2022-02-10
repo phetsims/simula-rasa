@@ -14,24 +14,29 @@ import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
 
+type SimulaRasaScreenOptions = {
+  tandem: Tandem
+};
+
 class SimulaRasaScreen extends Screen {
 
   /**
-   * @param {Object} [options]
+   * @param providedOptions
    */
-  constructor( options ) {
+  constructor( providedOptions: SimulaRasaScreenOptions ) {
 
-    options = merge( {
+    const options = merge( {
+
       //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
       backgroundColorProperty: SimulaRasaColors.screenBackgroundColorProperty,
 
       // phet-io options
       tandem: Tandem.REQUIRED
-    }, options );
+    }, providedOptions );
 
     super(
       () => new SimulaRasaModel( { tandem: options.tandem.createTandem( 'model' ) } ),
-      model => new SimulaRasaScreenView( model, { tandem: options.tandem.createTandem( 'view' ) } ),
+      ( model: SimulaRasaModel ) => new SimulaRasaScreenView( model, { tandem: options.tandem.createTandem( 'view' ) } ),
       options
     );
   }

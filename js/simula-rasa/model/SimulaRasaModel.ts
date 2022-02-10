@@ -6,23 +6,19 @@
  * @author {{AUTHOR}}
  */
 
-import merge from '../../../../phet-core/js/merge.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import simulaRasa from '../../simulaRasa.js';
+
+type SimulaRasaModelOptions = {
+  tandem?: Tandem
+};
 
 class SimulaRasaModel {
 
   /**
-   * @param {Object} [options]
+   * @param providedOptions
    */
-  constructor( options ) {
-
-    options = merge( {
-
-      // phet-io options
-      tandem: Tandem.REQUIRED
-    }, options );
-
+  constructor( providedOptions: SimulaRasaModelOptions ) {
     //TODO
   }
 
@@ -36,10 +32,10 @@ class SimulaRasaModel {
 
   /**
    * Steps the model.
-   * @param {number} dt - time step, in seconds
+   * @param dt - time step, in seconds
    * @public
    */
-  step( dt ) {
+  step( dt: number ) {
     //TODO
   }
 }

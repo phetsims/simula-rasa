@@ -14,20 +14,23 @@ import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
 import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
 
+type SimulaRasaScreenViewOptions = {
+  tandem?: Tandem
+};
+
 class SimulaRasaScreenView extends ScreenView {
 
   /**
-   * @param {SimulaRasaModel} model
-   * @param {Object} [options]
+   * @param model
+   * @param providedOptions
    */
-  constructor( model, options ) {
-    assert && assert( model instanceof SimulaRasaModel, 'invalid model' );
+  constructor( model: SimulaRasaModel, providedOptions: SimulaRasaScreenViewOptions ) {
 
-    options = merge( {
+    const options = merge( {
 
       // phet-io options
       tandem: Tandem.REQUIRED
-    }, options );
+    }, providedOptions );
 
     super( options );
 
@@ -57,7 +60,7 @@ class SimulaRasaScreenView extends ScreenView {
    * @param {number} dt - time step, in seconds
    * @public
    */
-  step( dt ) {
+  step( dt: number ) {
     //TODO
   }
 }
