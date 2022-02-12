@@ -18,7 +18,7 @@ type SimulaRasaScreenOptions = {
   tandem: Tandem
 };
 
-class SimulaRasaScreen extends Screen {
+class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
   /**
    * @param providedOptions
@@ -36,7 +36,7 @@ class SimulaRasaScreen extends Screen {
 
     super(
       () => new SimulaRasaModel( { tandem: options.tandem.createTandem( 'model' ) } ),
-      ( model: SimulaRasaModel ) => new SimulaRasaScreenView( model, { tandem: options.tandem.createTandem( 'view' ) } ),
+      model => new SimulaRasaScreenView( model, { tandem: options.tandem.createTandem( 'view' ) } ),
       options
     );
   }
