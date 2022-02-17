@@ -6,23 +6,19 @@
  * @author {{AUTHOR}}
  */
 
-import Screen from '../../../joist/js/Screen.js';
-import merge from '../../../phet-core/js/merge.js';
+import Screen, { ScreenOptions } from '../../../joist/js/Screen.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
 
-type SimulaRasaScreenOptions = {
-  tandem: Tandem
-};
-
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
-  constructor( providedOptions: SimulaRasaScreenOptions ) {
+  constructor( providedOptions: ScreenOptions ) {
 
-    const options = merge( {
+    const options = optionize<ScreenOptions, {}, ScreenOptions, 'tandem'>( {
 
       //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
       backgroundColorProperty: SimulaRasaColors.screenBackgroundColorProperty,

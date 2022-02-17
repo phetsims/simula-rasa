@@ -6,23 +6,19 @@
  * @author {{AUTHOR}}
  */
 
-import ScreenView from '../../../../joist/js/ScreenView.js';
-import merge from '../../../../phet-core/js/merge.js';
+import ScreenView, { ScreenViewOptions } from '../../../../joist/js/ScreenView.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
 import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
-
-type SimulaRasaScreenViewOptions = {
-  tandem?: Tandem
-};
+import optionize from '../../../../phet-core/js/optionize.js';
 
 class SimulaRasaScreenView extends ScreenView {
 
-  constructor( model: SimulaRasaModel, providedOptions: SimulaRasaScreenViewOptions ) {
+  constructor( model: SimulaRasaModel, providedOptions: ScreenViewOptions ) {
 
-    const options = merge( {
+    const options = optionize<ScreenViewOptions, {}, ScreenViewOptions, 'tandem'>( {
 
       // phet-io options
       tandem: Tandem.REQUIRED
