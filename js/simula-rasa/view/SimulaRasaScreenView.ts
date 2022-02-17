@@ -42,7 +42,7 @@ class SimulaRasaScreenView extends ScreenView {
   /**
    * Resets the view.
    */
-  reset(): void {
+  public reset(): void {
     //TODO
   }
 
@@ -50,7 +50,7 @@ class SimulaRasaScreenView extends ScreenView {
    * Steps the view.
    * @param dt - time step, in seconds
    */
-  step( dt: number ): void {
+  public step( dt: number ): void {
     //TODO
   }
 }

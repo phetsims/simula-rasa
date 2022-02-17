@@ -20,7 +20,7 @@ class SimulaRasaModel {
   /**
    * Resets the model.
    */
-  reset(): void {
+  public reset(): void {
     //TODO
   }
 
@@ -28,7 +28,7 @@ class SimulaRasaModel {
    * Steps the model.
    * @param dt - time step, in seconds
    */
-  step( dt: number ): void {
+  public step( dt: number ): void {
     //TODO
   }
 }
