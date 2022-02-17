@@ -15,16 +15,12 @@ type SimulaRasaModelOptions = {
 
 class SimulaRasaModel {
 
-  /**
-   * @param providedOptions
-   */
   constructor( providedOptions: SimulaRasaModelOptions ) {
     //TODO
   }
 
   /**
    * Resets the model.
-   * @public
    */
   reset() {
     //TODO
@@ -33,7 +29,6 @@ class SimulaRasaModel {
   /**
    * Steps the model.
    * @param dt - time step, in seconds
-   * @public
    */
   step( dt: number ) {
     //TODO

@@ -20,9 +20,6 @@ type SimulaRasaScreenOptions = {
 
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
-  /**
-   * @param providedOptions
-   */
   constructor( providedOptions: SimulaRasaScreenOptions ) {
 
     const options = merge( {

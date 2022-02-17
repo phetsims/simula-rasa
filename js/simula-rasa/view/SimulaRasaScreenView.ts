@@ -20,10 +20,6 @@ type SimulaRasaScreenViewOptions = {
 
 class SimulaRasaScreenView extends ScreenView {
 
-  /**
-   * @param model
-   * @param providedOptions
-   */
   constructor( model: SimulaRasaModel, providedOptions: SimulaRasaScreenViewOptions ) {
 
     const options = merge( {
@@ -49,7 +45,6 @@ class SimulaRasaScreenView extends ScreenView {
 
   /**
    * Resets the view.
-   * @public
    */
   reset() {
     //TODO
@@ -57,8 +52,7 @@ class SimulaRasaScreenView extends ScreenView {
 
   /**
    * Steps the view.
-   * @param {number} dt - time step, in seconds
-   * @public
+   * @param dt - time step, in seconds
    */
   step( dt: number ) {
     //TODO
