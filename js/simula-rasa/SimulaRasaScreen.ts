@@ -13,12 +13,16 @@ import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+
+type SimulaRasaScreenSelfOptions = Required<Pick<PhetioObjectOptions, 'tandem'>>;
+type SimulaRasaScreenOptions = SimulaRasaScreenSelfOptions & ScreenOptions;
 
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
-  constructor( providedOptions: ScreenOptions ) {
+  constructor( providedOptions: SimulaRasaScreenOptions ) {
 
-    const options = optionize<ScreenOptions, {}, ScreenOptions, 'tandem'>( {
+    const options = optionize<SimulaRasaScreenOptions, SimulaRasaScreenSelfOptions, ScreenOptions, 'tandem'>( {
 
       //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
       backgroundColorProperty: SimulaRasaColors.screenBackgroundColorProperty,
