@@ -13,9 +13,9 @@ import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
-import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import { PhetioObjectOptions, RequiredTandem } from '../../../tandem/js/PhetioObject.js';
 
-type SimulaRasaScreenSelfOptions = Required<Pick<PhetioObjectOptions, 'tandem'>>;
+type SimulaRasaScreenSelfOptions = RequiredTandem<PhetioObjectOptions>;
 type SimulaRasaScreenOptions = SimulaRasaScreenSelfOptions & ScreenOptions;
 
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {

@@ -7,9 +7,9 @@
  */
 
 import simulaRasa from '../../simulaRasa.js';
-import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
+import { PhetioObjectOptions, RequiredTandem } from '../../../../tandem/js/PhetioObject.js';
 
-type SimulaRasaModelOptions = Required<Pick<PhetioObjectOptions, 'tandem'>>;
+type SimulaRasaModelOptions = RequiredTandem<PhetioObjectOptions>;
 
 class SimulaRasaModel {
 
