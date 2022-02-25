@@ -13,10 +13,10 @@ import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
 import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { PhetioObjectOptions, RequiredTandem } from '../../../../tandem/js/PhetioObject.js';
+import { RequiredTandem } from '../../../../tandem/js/PhetioObject.js';
 import { ScreenOptions } from '../../../../joist/js/Screen.js';
 
-type SimulaRasaScreenViewSelfOptions = RequiredTandem<PhetioObjectOptions>;
+type SimulaRasaScreenViewSelfOptions = RequiredTandem;
 type SimulaRasaScreenViewOptions = SimulaRasaScreenViewSelfOptions & ScreenOptions;
 
 class SimulaRasaScreenView extends ScreenView {
