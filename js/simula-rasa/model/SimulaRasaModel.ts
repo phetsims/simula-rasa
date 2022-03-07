@@ -7,9 +7,14 @@
  */
 
 import simulaRasa from '../../simulaRasa.js';
-import { RequiredTandem } from '../../../../tandem/js/PhetioObject.js';
+import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
+import { PickRequired } from '../../../../phet-core/js/types/PickRequired.js';
 
-type SimulaRasaModelOptions = RequiredTandem;
+type SelfOptions = {
+  //TODO add options that are specific to SimulaRasaModel here
+};
+
+type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 'tandem'>;
 
 class SimulaRasaModel {
 

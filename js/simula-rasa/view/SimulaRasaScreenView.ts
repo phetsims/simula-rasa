@@ -8,25 +8,27 @@
 
 import ScreenView, { ScreenViewOptions } from '../../../../joist/js/ScreenView.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
-import Tandem from '../../../../tandem/js/Tandem.js';
 import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
 import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { RequiredTandem } from '../../../../tandem/js/PhetioObject.js';
-import { ScreenOptions } from '../../../../joist/js/Screen.js';
+import { PickRequired } from '../../../../phet-core/js/types/PickRequired.js';
 
-type SimulaRasaScreenViewSelfOptions = RequiredTandem;
-type SimulaRasaScreenViewOptions = SimulaRasaScreenViewSelfOptions & ScreenOptions;
+type SelfOptions = {
+ //TODO add options that are specific to SimulaRasaScreenView here
+};
+
+type SimulaRasaScreenViewOptions = SelfOptions & PickRequired<ScreenViewOptions, 'tandem'>;
 
 class SimulaRasaScreenView extends ScreenView {
 
   constructor( model: SimulaRasaModel, providedOptions: SimulaRasaScreenViewOptions ) {
 
-    const options = optionize<SimulaRasaScreenViewOptions, SimulaRasaScreenViewSelfOptions, ScreenViewOptions, 'tandem'>( {
+    const options = optionize<SimulaRasaScreenViewOptions, SelfOptions, ScreenViewOptions>( {
 
-      // phet-io options
-      tandem: Tandem.REQUIRED
+      //TODO add default values for optional SelfOptions here
+
+      //TODO add default values for optional ScreenViewOptions here
     }, providedOptions );
 
     super( options );

@@ -8,27 +8,28 @@
 
 import Screen, { ScreenOptions } from '../../../joist/js/Screen.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import Tandem from '../../../tandem/js/Tandem.js';
+import { PickRequired } from '../../../phet-core/js/types/PickRequired.js';
 import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
-import { RequiredTandem } from '../../../tandem/js/PhetioObject.js';
 
-type SimulaRasaScreenSelfOptions = RequiredTandem;
-type SimulaRasaScreenOptions = SimulaRasaScreenSelfOptions & ScreenOptions;
+type SelfOptions = {
+  //TODO add options that are specific to SimulaRasaScreen here
+};
+
+type SimulaRasaScreenOptions = SelfOptions & PickRequired<ScreenOptions, 'tandem'>;
 
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
   constructor( providedOptions: SimulaRasaScreenOptions ) {
 
-    const options = optionize<SimulaRasaScreenOptions, SimulaRasaScreenSelfOptions, ScreenOptions, 'tandem'>( {
+    const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>( {
 
-      //TODO if you include homeScreenIcon or navigationBarIcon, use JOIST/ScreenIcon
-      backgroundColorProperty: SimulaRasaColors.screenBackgroundColorProperty,
+      //TODO add default values for optional SelfOptions here
 
-      // phet-io options
-      tandem: Tandem.REQUIRED
+      //TODO add default values for optional ScreenOptions here
+      backgroundColorProperty: SimulaRasaColors.screenBackgroundColorProperty
     }, providedOptions );
 
     super(
