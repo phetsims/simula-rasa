@@ -12,7 +12,7 @@ import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
 import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { PickRequired } from '../../../../phet-core/js/types/PickRequired.js';
+import PickRequired from '../../../../phet-core/js/types/PickRequired.js';
 
 type SelfOptions = {
  //TODO add options that are specific to SimulaRasaScreenView here
