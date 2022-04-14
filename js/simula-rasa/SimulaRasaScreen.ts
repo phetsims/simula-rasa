@@ -8,7 +8,6 @@
 
 import Screen, { ScreenOptions } from '../../../joist/js/Screen.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import PickRequired from '../../../phet-core/js/types/PickRequired.js';
 import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
@@ -18,7 +17,7 @@ type SelfOptions = {
   //TODO add options that are specific to SimulaRasaScreen here
 };
 
-type SimulaRasaScreenOptions = SelfOptions & PickRequired<ScreenOptions, 'tandem'>;
+type SimulaRasaScreenOptions = SelfOptions & ScreenOptions;
 
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
