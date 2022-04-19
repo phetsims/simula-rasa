@@ -23,7 +23,7 @@ class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
   constructor( providedOptions: SimulaRasaScreenOptions ) {
 
-    const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>( {
+    const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>()( {
 
       //TODO add default values for optional SelfOptions here
 
