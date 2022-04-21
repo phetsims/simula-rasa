@@ -56,7 +56,7 @@ class SimulaRasaScreenView extends ScreenView {
    * Steps the view.
    * @param dt - time step, in seconds
    */
-  public step( dt: number ): void {
+  public override step( dt: number ): void {
     //TODO
   }
 }
