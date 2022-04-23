@@ -6,7 +6,7 @@
  * @author {{AUTHOR}}
  */
 
-import Sim from '../../joist/js/Sim.js';
+import Sim, { SimOptions } from '../../joist/js/Sim.js';
 import simLauncher from '../../joist/js/simLauncher.js';
 import Tandem from '../../tandem/js/Tandem.js';
 import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
@@ -14,7 +14,7 @@ import simulaRasaStrings from './simulaRasaStrings.js';
 
 const simulaRasaTitleString = simulaRasaStrings[ 'simula-rasa' ].title;
 
-const simOptions = {
+const simOptions: SimOptions = {
 
   //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
   credits: {
