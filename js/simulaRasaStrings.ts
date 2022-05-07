@@ -9,7 +9,7 @@ import simulaRasa from './simulaRasa.js';
 
 type StringsType = {
   'simula-rasa': {
-    'title': string
+    'title': string;
   }
 };
 
