@@ -19,7 +19,7 @@ import simulaRasa from '../simulaRasa.js';
 
 const simulaRasaColors = {
 
-  // Background color that for screens in this sim
+  // Background color for screens in this sim
   screenBackgroundColorProperty: new ProfileColorProperty( simulaRasa, 'background', {
     default: 'white'
   } )
