@@ -11,6 +11,7 @@ import simLauncher from '../../joist/js/simLauncher.js';
 import Tandem from '../../tandem/js/Tandem.js';
 import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
 import simulaRasaStrings from './simulaRasaStrings.js';
+import './common/SimulaRasaQueryParameters.js';
 
 const simulaRasaTitleString = simulaRasaStrings[ 'simula-rasa' ].title;
 
