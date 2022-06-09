@@ -21,7 +21,7 @@ type SimulaRasaScreenOptions = SelfOptions & ScreenOptions;
 
 class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
-  constructor( providedOptions: SimulaRasaScreenOptions ) {
+  public constructor( providedOptions: SimulaRasaScreenOptions ) {
 
     const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>()( {
 

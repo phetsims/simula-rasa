@@ -18,7 +18,7 @@ type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 't
 
 class SimulaRasaModel {
 
-  constructor( providedOptions: SimulaRasaModelOptions ) {
+  public constructor( providedOptions: SimulaRasaModelOptions ) {
     //TODO
   }
 
