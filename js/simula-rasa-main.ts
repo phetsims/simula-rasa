@@ -13,27 +13,31 @@ import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
 import simulaRasaStrings from './simulaRasaStrings.js';
 import './common/SimulaRasaQueryParameters.js';
 
-const simulaRasaTitleString = simulaRasaStrings[ 'simula-rasa' ].title;
-
-const simOptions: SimOptions = {
-
-  //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
-  credits: {
-    leadDesign: '',
-    softwareDevelopment: '',
-    team: '',
-    qualityAssurance: '',
-    graphicArts: '',
-    soundDesign: '',
-    thanks: ''
-  }
-};
-
-// launch the sim - beware that scenery Image nodes created outside of simLauncher.launch() will have zero bounds
-// until the images are fully loaded, see https://github.com/phetsims/coulombs-law/issues/70
+// Launch the sim. Beware that scenery Image nodes created outside simLauncher.launch() will have zero bounds
+// until the images are fully loaded. See https://github.com/phetsims/coulombs-law/issues/70#issuecomment-429037461
 simLauncher.launch( () => {
-  const sim = new Sim( simulaRasaTitleString, [
+
+  const title = simulaRasaStrings[ 'simula-rasa' ].title;
+
+  const screens = [
     new SimulaRasaScreen( { tandem: Tandem.ROOT.createTandem( 'simulaRasaScreen' ) } )
-  ], simOptions );
+  ];
+
+  const options: SimOptions = {
+
+    //TODO fill in credits, all of these fields are optional, see joist.CreditsNode
+    credits: {
+      leadDesign: '',
+      softwareDevelopment: '',
+      team: '',
+      contributors: '',
+      qualityAssurance: '',
+      graphicArts: '',
+      soundDesign: '',
+      thanks: ''
+    }
+  };
+
+  const sim = new Sim( title, screens, options );
   sim.start();
 } );
