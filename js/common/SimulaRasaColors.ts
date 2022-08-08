@@ -17,7 +17,7 @@
 import { ProfileColorProperty } from '../../../scenery/js/imports.js';
 import simulaRasa from '../simulaRasa.js';
 
-const simulaRasaColors = {
+const SimulaRasaColors = {
 
   // Background color for screens in this sim
   screenBackgroundColorProperty: new ProfileColorProperty( simulaRasa, 'background', {
@@ -25,5 +25,5 @@ const simulaRasaColors = {
   } )
 };
 
-simulaRasa.register( 'simulaRasaColors', simulaRasaColors );
-export default simulaRasaColors;
+simulaRasa.register( 'SimulaRasaColors', SimulaRasaColors );
+export default SimulaRasaColors;
