@@ -15,8 +15,8 @@ type StringsType = {
   }
 };
 
-const simulaRasaStrings = getStringModule( 'SIMULA_RASA' ) as StringsType;
+const SimulaRasaStrings = getStringModule( 'SIMULA_RASA' ) as StringsType;
 
-simulaRasa.register( 'simulaRasaStrings', simulaRasaStrings );
+simulaRasa.register( 'SimulaRasaStrings', SimulaRasaStrings );
 
-export default simulaRasaStrings;
+export default SimulaRasaStrings;
