@@ -10,14 +10,14 @@ import Sim, { SimOptions } from '../../joist/js/Sim.js';
 import simLauncher from '../../joist/js/simLauncher.js';
 import Tandem from '../../tandem/js/Tandem.js';
 import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
-import SimulaRasaStrings from './SimulaRasaStrings.js';
+import simulaRasaStrings from './simulaRasaStrings.js';
 import './common/SimulaRasaQueryParameters.js';
 
 // Launch the sim. Beware that scenery Image nodes created outside simLauncher.launch() will have zero bounds
 // until the images are fully loaded. See https://github.com/phetsims/coulombs-law/issues/70#issuecomment-429037461
 simLauncher.launch( () => {
 
-  const title = SimulaRasaStrings[ 'simula-rasa' ].title;
+  const title = simulaRasaStrings[ 'simula-rasa' ].title;
 
   const screens = [
     new SimulaRasaScreen( { tandem: Tandem.ROOT.createTandem( 'simulaRasaScreen' ) } )
