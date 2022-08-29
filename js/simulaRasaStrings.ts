@@ -11,7 +11,7 @@ import simulaRasa from './simulaRasa.js';
 type StringsType = {
   'simula-rasa': {
     'title': string;
-    'titleProperty': TReadOnlyProperty<string>;
+    'titleStringProperty': TReadOnlyProperty<string>;
   }
 };
 
