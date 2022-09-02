@@ -17,7 +17,7 @@ import './common/SimulaRasaQueryParameters.js';
 // until the images are fully loaded. See https://github.com/phetsims/coulombs-law/issues/70#issuecomment-429037461
 simLauncher.launch( () => {
 
-  const title = simulaRasaStrings[ 'simula-rasa' ].title;
+  const titleStringProperty = simulaRasaStrings[ 'simula-rasa' ].titleStringProperty;
 
   const screens = [
     new SimulaRasaScreen( { tandem: Tandem.ROOT.createTandem( 'simulaRasaScreen' ) } )
@@ -38,6 +38,6 @@ simLauncher.launch( () => {
     }
   };
 
-  const sim = new Sim( title, screens, options );
+  const sim = new Sim( titleStringProperty, screens, options );
   sim.start();
 } );
