@@ -12,6 +12,10 @@ type StringsType = {
   'simula-rasa': {
     'title': string;
     'titleStringProperty': TReadOnlyProperty<string>;
+  };
+  'screen': {
+    'name': string;
+    'nameStringProperty': TReadOnlyProperty<string>;
   }
 };
 

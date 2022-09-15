@@ -12,6 +12,7 @@ import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
+import SimulaRasaStrings from '../SimulaRasaStrings.js';
 
 type SelfOptions = {
   //TODO add options that are specific to SimulaRasaScreen here
@@ -24,6 +25,7 @@ class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
   public constructor( providedOptions: SimulaRasaScreenOptions ) {
 
     const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>()( {
+      name: SimulaRasaStrings.screen.nameStringProperty,
 
       //TODO add default values for optional SelfOptions here
 
