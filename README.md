@@ -10,12 +10,6 @@ npm update
 cd ../perennial/
 grunt create-sim --repo=project-name --author="Your Name (Your Affiliation)"
 ```
-
-For TypeScript transpilation, add a new PhET simulation to perennial-alias/data/active-repos. If this is not a
-PhET simulation you can transpile the sim with the `repos` option of the transpiler. For example:
-```
-cd chipper
-node js/scripts/transpile.js --watch --repos=project-name
-```
-See https://github.com/phetsims/phet-info/blob/master/doc/phet-development-overview.md#transpile-typescript for more
-information.
+For the simulation to run it will need TypeScript transpilation. If this is a PhET brand sim, continue to https://github.com/phetsims/phet-info/blob/master/checklists/new-repo-checklist.md.
+If this is not a PhET brand simulation see https://github.com/phetsims/phet-info/blob/master/doc/phet-development-overview.md#transpile-typescript for
+next steps.
