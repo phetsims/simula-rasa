@@ -11,7 +11,7 @@ cd ../perennial/
 grunt create-sim --repo=project-name --author="Your Name (Your Affiliation)"
 ```
 
-To transpile a new PhET sim to TypeScript, add the new sim to perennial-alias/data/active-repos. If this is not a
+For TypeScript transpilation, add a new PhET simulation to perennial-alias/data/active-repos. If this is not a
 PhET simulation you can traspile the sim with the `repos` option of the transpiler. For example
 ```
 cd chipper
