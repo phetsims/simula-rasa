@@ -12,7 +12,7 @@ grunt create-sim --repo=project-name --author="Your Name (Your Affiliation)"
 ```
 
 For TypeScript transpilation, add a new PhET simulation to perennial-alias/data/active-repos. If this is not a
-PhET simulation you can traspile the sim with the `repos` option of the transpiler. For example
+PhET simulation you can transpile the sim with the `repos` option of the transpiler. For example:
 ```
 cd chipper
 node js/scripts/transpile.js --watch --repos=project-name
