@@ -10,11 +10,9 @@ import simulaRasa from './simulaRasa.js';
 
 type StringsType = {
   'simula-rasa': {
-    'title': string;
     'titleStringProperty': LinkableProperty<string>;
   };
   'screen': {
-    'name': string;
     'nameStringProperty': LinkableProperty<string>;
   }
 };
