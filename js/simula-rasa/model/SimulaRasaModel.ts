@@ -9,6 +9,7 @@
 import simulaRasa from '../../simulaRasa.js';
 import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import PickRequired from '../../../../phet-core/js/types/PickRequired.js';
+import TModel from '../../../../joist/js/TModel.js';
 
 type SelfOptions = {
   //TODO add options that are specific to SimulaRasaModel here
@@ -16,7 +17,7 @@ type SelfOptions = {
 
 type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 'tandem'>;
 
-class SimulaRasaModel {
+class SimulaRasaModel implements TModel {
 
   public constructor( providedOptions: SimulaRasaModelOptions ) {
     //TODO
