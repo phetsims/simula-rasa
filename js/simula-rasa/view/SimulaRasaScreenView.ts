@@ -19,7 +19,7 @@ type SelfOptions = {
 
 type SimulaRasaScreenViewOptions = SelfOptions & ScreenViewOptions;
 
-class SimulaRasaScreenView extends ScreenView {
+export default class SimulaRasaScreenView extends ScreenView {
 
   public constructor( model: SimulaRasaModel, providedOptions: SimulaRasaScreenViewOptions ) {
 
@@ -62,4 +62,3 @@ class SimulaRasaScreenView extends ScreenView {
 }
 
 simulaRasa.register( 'SimulaRasaScreenView', SimulaRasaScreenView );
-export default SimulaRasaScreenView;

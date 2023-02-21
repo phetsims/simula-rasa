@@ -20,7 +20,7 @@ type SelfOptions = {
 
 type SimulaRasaScreenOptions = SelfOptions & ScreenOptions;
 
-class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
+export default class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 
   public constructor( providedOptions: SimulaRasaScreenOptions ) {
 
@@ -42,4 +42,3 @@ class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasaScreenView> {
 }
 
 simulaRasa.register( 'SimulaRasaScreen', SimulaRasaScreen );
-export default SimulaRasaScreen;

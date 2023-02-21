@@ -17,7 +17,7 @@ type SelfOptions = {
 
 type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 'tandem'>;
 
-class SimulaRasaModel implements TModel {
+export default class SimulaRasaModel implements TModel {
 
   public constructor( providedOptions: SimulaRasaModelOptions ) {
     //TODO
@@ -40,4 +40,3 @@ class SimulaRasaModel implements TModel {
 }
 
 simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
-export default SimulaRasaModel;
