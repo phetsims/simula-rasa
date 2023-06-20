@@ -5,15 +5,15 @@
  */
 /* eslint-disable */
 import getStringModule from '../../chipper/js/getStringModule.js';
-import LinkableProperty from '../../axon/js/LinkableProperty.js';
+import type LocalizedStringProperty from '../../chipper/js/LocalizedStringProperty.js';
 import simulaRasa from './simulaRasa.js';
 
 type StringsType = {
   'simula-rasa': {
-    'titleStringProperty': LinkableProperty<string>;
+    'titleStringProperty': LocalizedStringProperty;
   };
   'screen': {
-    'nameStringProperty': LinkableProperty<string>;
+    'nameStringProperty': LocalizedStringProperty;
   }
 };
 
