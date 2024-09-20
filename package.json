@@ -43,7 +43,7 @@
         },
         "parserOptions": {
           "project": [
-            "../simula-rasa/tsconfig.json"
+            "../chipper/tsconfig/eslint-all/tsconfig.json"
           ]
         }
       }
