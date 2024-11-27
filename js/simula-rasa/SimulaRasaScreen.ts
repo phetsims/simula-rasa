@@ -10,9 +10,9 @@ import Screen, { ScreenOptions } from '../../../joist/js/Screen.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
+import SimulaRasaStrings from '../SimulaRasaStrings.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
-import SimulaRasaStrings from '../SimulaRasaStrings.js';
 
 type SelfOptions = {
   //TODO add options that are specific to SimulaRasaScreen here
