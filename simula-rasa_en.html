@@ -134,7 +134,7 @@
   // Queue all of the preloads to be loaded.
   preloads.forEach( preload => loadURL( preload ) );
 
-  const targetSource = esbuild ? './dist/bundle.js' : '../chipper/dist/js/simula-rasa/js/simula-rasa-main.js';
+  const targetSource = esbuild ? '../chipper/dist/dev-server-runnable/simula-rasa.js' : '../chipper/dist/js/simula-rasa/js/simula-rasa-main.js';
 
   // Module loading in compilation-free (development) mode will be kicked off once strings are loaded.
   // This is done in load-unbuilt-strings.js
