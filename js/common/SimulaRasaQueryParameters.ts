@@ -11,14 +11,9 @@ import logGlobal from '../../../phet-core/js/logGlobal.js';
 import { QueryStringMachine } from '../../../query-string-machine/js/QueryStringMachineModule.js';
 import simulaRasa from '../simulaRasa.js';
 
-const SCHEMA_MAP = {
+const SimulaRasaQueryParameters = QueryStringMachine.getAll( {
   //TODO add schemas for query parameters
-};
-
-const SimulaRasaQueryParameters = QueryStringMachine.getAll( SCHEMA_MAP );
-
-// The schema map is a read-only part of the public API, in case schema details (e.g. validValues) are needed elsewhere.
-SimulaRasaQueryParameters.SCHEMA_MAP = SCHEMA_MAP;
+} );
 
 simulaRasa.register( 'SimulaRasaQueryParameters', SimulaRasaQueryParameters );
 
