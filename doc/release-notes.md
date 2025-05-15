@@ -1,22 +1,29 @@
 # {{sim_name}} - Release Notes
-<!-- Developer and designer should collaborate on what to include for any release beyond 1.0. 
-For a 1.0 release, only the 1.0 heading and date is needed. 
-When releasing a new version, add a release section to the top of the doc. -->
+<!-- 
+Instructions:
+* Replace {{sim_name}} with the simulation name.
+* Replace YYYY-MM-DD with date in year-month-day format.
+* Make sure version numbers are correct, in MAJOR.MINOR format, e.g. 1.2
+* For a 1.0 release, only the 1.0 heading and date is needed. 
+* Developer and designer should collaborate on what to include for any release beyond 1.0. 
+* For each new MAJOR.MINOR version, add a section to the top of the doc - reverse chronological order, with the most-recent version at the top.
+-->
 
 <!-- 
-## [1.2] 2000-01-31
+## 1.1 (YYYY-MM-DD)
 
 ### New Features
-* Add tier 1 description [link to issue](url)
+* Describe a new feature. [optional link to issue](url)
 * 
 
 ### Bug Fixes
-* Timer resets properly [link to issue](url)
+* Describe a bug fix. [optional link to issue](url)
 * 
 
 ### Other Changes
-* :warning: The hipbone no longer connects to the legbone, so if you planned on taking an extended walk, think again.
-* 
+* Describe a change. [optional link to issue](url)
+* ⚠️ Use this icon for a change that is breaking, removes a feature, etc. 
+*
 -->
 
-## [1.0] 2000-01-31
+## 1.0 (YYYY-MM-DD)
