@@ -1,7 +1,7 @@
-# {{SIM_NAME}} - Release Notes
+# {{SIM_TITLE}} - Release Notes
 <!-- 
 Instructions:
-* Replace {{SIM_NAME}} with the simulation name.
+* Replace {{SIM_TITLE}} with the simulation title.
 * For a published version, replace {{PUBLICATION_DATE}} with date that the version was published, in year-month-day format, e.g. "2025-05-16".
 * For a version that has not been published yet, replace {{PUBLICATION_DATE}} with "in progress".
 * Make sure version numbers are correct, in MAJOR.MINOR format, e.g. 1.2
