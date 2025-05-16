@@ -7,7 +7,7 @@ Instructions:
 * Make sure version numbers are correct, in MAJOR.MINOR format, e.g. "1.2".
 * For a 1.0 release, only the 1.0 heading and date is needed. This included ports of legacy sims.
 * Developer and designer should collaborate on what to include for any release beyond 1.0. 
-* For each new MAJOR.MINOR version, add a section to the top of the doc - reverse chronological order, with the most-recent version at the top.
+* For each new version, add a section to the top of these release notes - reverse chronological order, with the most-recent version at the top.
 
 For an exemplar, see https://github.com/phetsims/balancing-chemical-equations/blob/main/doc/release-notes.md
 -->
