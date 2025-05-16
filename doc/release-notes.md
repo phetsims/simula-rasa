@@ -2,7 +2,7 @@
 <!-- 
 Instructions:
 * Replace {{SIM_TITLE}} with the simulation title.
-* For a published version, replace {{PUBLICATION_DATE}} with date that the version was published, in year-month-day format, e.g. "2025-05-16".
+* For a published version, replace {{PUBLICATION_DATE}} with the publication date, in year-month-day format, e.g. "2025-05-16".
 * For a version that has not been published yet, replace {{PUBLICATION_DATE}} with "in progress".
 * Make sure version numbers are correct, in MAJOR.MINOR format, e.g. 1.2
 * For a 1.0 release, only the 1.0 heading and date is needed. This included ports of legacy sims.
