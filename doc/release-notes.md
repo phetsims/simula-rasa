@@ -1,8 +1,8 @@
-# {{sim_name}} - Release Notes
+# {{SIM_NAME}} - Release Notes
 <!-- 
 Instructions:
-* Replace {{sim_name}} with the simulation name.
-* Replace YYYY-MM-DD with date in year-month-day format. For a release that has not been published, replace YYYY-MM-DD with "in progress".
+* Replace {{SIM_NAME}} with the simulation name.
+* Replace {{PUBLICATION_DATE}} with date in year-month-day format, e.g. "2025-05-16". For a release that has not been published, replace {{PUBLICATION_DATE}} with "in progress".
 * Make sure version numbers are correct, in MAJOR.MINOR format, e.g. 1.2
 * For a 1.0 release, only the 1.0 heading and date is needed. This included ports of legacy sims.
 * Developer and designer should collaborate on what to include for any release beyond 1.0. 
@@ -12,7 +12,7 @@ For an exemplar, see https://github.com/phetsims/balancing-chemical-equations/bl
 -->
 
 <!-- 
-## 1.1 (YYYY-MM-DD)
+## 1.1 ({{PUBLICATION_DATE}})
 
 ### New Features
 * Describe a new feature.
@@ -28,4 +28,4 @@ For an exemplar, see https://github.com/phetsims/balancing-chemical-equations/bl
 *
 -->
 
-## 1.0 (YYYY-MM-DD)
+## 1.0 ({{PUBLICATION_DATE}})
