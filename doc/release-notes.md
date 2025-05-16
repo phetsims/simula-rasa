@@ -15,15 +15,15 @@ For an exemplar, see https://github.com/phetsims/balancing-chemical-equations/bl
 ## 1.1 (YYYY-MM-DD)
 
 ### New Features
-* Describe a new feature. [optional link to issue](url)
+* Describe a new feature.
 * 
 
 ### Bug Fixes
-* Describe a bug fix. [optional link to issue](url)
+* Describe a bug fix.
 * 
 
 ### Other Changes
-* Describe a change. [optional link to issue](url)
+* Describe a change.
 * ⚠️ Use this icon for a change that is breaking, removes a feature, etc. 
 *
 -->
