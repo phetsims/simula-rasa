@@ -13,7 +13,7 @@ For an exemplar, see https://github.com/phetsims/balancing-chemical-equations/bl
 -->
 
 <!-- 
-## {{VERSION}} ({{PUBLICATION_DATE}})
+## {{MAJOR.MINOR}} ({{PUBLICATION_DATE}})
 
 ### New Features
 * Describe a new feature.
