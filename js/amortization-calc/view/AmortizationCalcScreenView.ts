@@ -52,25 +52,15 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Create UI container
     const uiWrapper = document.createElement( 'div' );
-    const initialWrapperWidth = Math.min( 720, Math.round( this.layoutBounds.width * 0.95 ) );
-    uiWrapper.style.width = initialWrapperWidth + 'px';
-    uiWrapper.style.maxWidth = '95vw';
-    uiWrapper.style.minWidth = '320px';
-    uiWrapper.style.overflowX = 'auto';
-    uiWrapper.style.background = '#ffffff';
-    uiWrapper.style.padding = '6px';
-    uiWrapper.style.border = '1px solid #ddd';
-    uiWrapper.style.borderRadius = '4px';
-    uiWrapper.style.boxSizing = 'border-box';
-    uiWrapper.style.pointerEvents = 'auto';
-    uiWrapper.tabIndex = 0;
+    const layoutWidth = this.layoutBounds.width;
+    const layoutHeight = this.layoutBounds.height;
+    
     uiWrapper.style.position = 'relative';
-    uiWrapper.style.zIndex = '1000';
-    uiWrapper.style.display = 'flex';
-    uiWrapper.style.flexDirection = 'column';
-    uiWrapper.style.gap = '8px';
-    uiWrapper.style.marginLeft = 'auto';
-    uiWrapper.style.marginRight = 'auto';
+    uiWrapper.style.width = layoutWidth + 'px';
+    uiWrapper.style.height = layoutHeight + 'px';
+    uiWrapper.style.pointerEvents = 'auto';
+    uiWrapper.style.overflow = 'visible';
+    uiWrapper.tabIndex = 0;
 
     // Prevent pointer events from bubbling to Scenery
     const stop = ( e: Event ) => {
@@ -78,13 +68,35 @@ export default class AmortizationCalcScreenView extends ScreenView {
     };
     [ 'pointerdown', 'pointermove', 'pointerup', 'mousedown', 'mousemove', 'mouseup', 'click' ].forEach( ev => uiWrapper.addEventListener( ev, stop ) );
 
-    // Create left column for form, results, and table
-    const leftColumn = document.createElement( 'div' );
-    leftColumn.style.flex = '0 0 280px';
-    leftColumn.style.display = 'flex';
-    leftColumn.style.flexDirection = 'column';
-    leftColumn.style.gap = '8px';
-    leftColumn.style.minWidth = '0';
+    // Create control panel (left side) for form, results, and table
+    const controlPanel = document.createElement( 'div' );
+    controlPanel.style.position = 'absolute';
+    controlPanel.style.left = '15px';
+    controlPanel.style.top = '15px';
+    controlPanel.style.width = '450px';
+    controlPanel.style.maxHeight = ( layoutHeight - 30 ) + 'px';
+    controlPanel.style.background = '#ffffff';
+    controlPanel.style.padding = '10px';
+    controlPanel.style.border = '2px solid #ccc';
+    controlPanel.style.borderRadius = '8px';
+    controlPanel.style.boxSizing = 'border-box';
+    controlPanel.style.pointerEvents = 'auto';
+    controlPanel.style.display = 'flex';
+    controlPanel.style.flexDirection = 'column';
+    controlPanel.style.gap = '10px';
+    controlPanel.style.overflow = 'auto';
+    controlPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+
+    // Control panel title
+    const controlTitle = document.createElement( 'div' );
+    controlTitle.textContent = 'Loan Calculator';
+    controlTitle.style.fontSize = '16px';
+    controlTitle.style.fontWeight = 'bold';
+    controlTitle.style.marginBottom = '5px';
+    controlTitle.style.textAlign = 'center';
+    controlTitle.style.color = '#333';
+    controlTitle.style.borderBottom = '2px solid #2bbfbd';
+    controlTitle.style.paddingBottom = '8px';
 
     // Build form
     const form = document.createElement( 'form' );
@@ -98,14 +110,14 @@ export default class AmortizationCalcScreenView extends ScreenView {
       wrap.style.flexDirection = 'column';
       const label = document.createElement( 'label' );
       label.textContent = labelText;
-      label.style.fontSize = '12px';
+      label.style.fontSize = '16px';
       label.style.marginBottom = '2px';
       const input = document.createElement( 'input' );
       input.type = 'number';
       input.value = inputValue;
       input.style.padding = '6px 8px';
       input.style.boxSizing = 'border-box';
-      input.style.fontSize = '14px';
+      input.style.fontSize = '16px';
       input.addEventListener( 'keydown', stop );
       wrap.appendChild( label );
       wrap.appendChild( input );
@@ -122,10 +134,22 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     const calculateButton = document.createElement( 'button' );
     calculateButton.type = 'button';
-    calculateButton.textContent = 'Calculate';
-    calculateButton.style.padding = '8px 12px';
-    calculateButton.style.fontSize = '14px';
+    calculateButton.textContent = 'Amortize!';
+    calculateButton.style.padding = '10px 16px';
+    calculateButton.style.fontSize = '16px';
+    calculateButton.style.fontWeight = 'bold';
+    calculateButton.style.backgroundColor = '#2bbfbd';
+    calculateButton.style.color = 'white';
+    calculateButton.style.border = 'none';
+    calculateButton.style.borderRadius = '4px';
+    calculateButton.style.cursor = 'pointer';
     calculateButton.addEventListener( 'click', stop );
+    calculateButton.addEventListener( 'mouseenter', () => {
+      calculateButton.style.backgroundColor = '#239a98';
+    } );
+    calculateButton.addEventListener( 'mouseleave', () => {
+      calculateButton.style.backgroundColor = '#2bbfbd';
+    } );
     form.appendChild( calculateButton );
 
     // Results display
@@ -144,52 +168,139 @@ export default class AmortizationCalcScreenView extends ScreenView {
     tableContainer.style.pointerEvents = 'auto';
     tableContainer.style.userSelect = 'text';
 
-    // Append to left column
-    leftColumn.appendChild( form );
-    leftColumn.appendChild( resultsDiv );
-    leftColumn.appendChild( tableContainer );
+    // Append to control panel
+    controlPanel.appendChild( controlTitle );
+    controlPanel.appendChild( form );
+    controlPanel.appendChild( tableContainer );
 
-    // Empty middle column for future use
-    const middleColumn = document.createElement( 'div' );
-    middleColumn.style.flex = '1';
-    middleColumn.style.minWidth = '0';
+    // Create results panel (top right) for monthly payment, total interest, etc.
+    const resultsPanel = document.createElement( 'div' );
+    resultsPanel.style.position = 'absolute';
+    resultsPanel.style.left = '480px';
+    resultsPanel.style.top = '15px';
+    resultsPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
+    resultsPanel.style.background = '#ffffff';
+    resultsPanel.style.padding = '15px';
+    resultsPanel.style.border = '2px solid #ccc';
+    resultsPanel.style.borderRadius = '8px';
+    resultsPanel.style.boxSizing = 'border-box';
+    resultsPanel.style.pointerEvents = 'auto';
+    resultsPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
 
-    // Top section with two columns
-    const topSection = document.createElement( 'div' );
-    topSection.style.display = 'flex';
-    topSection.style.gap = '12px';
-    topSection.style.width = '100%';
-    topSection.appendChild( leftColumn );
-    topSection.appendChild( middleColumn );
+    const resultsTitle = document.createElement( 'div' );
+    resultsTitle.textContent = 'Payment Summary';
+    resultsTitle.style.fontSize = '16px';
+    resultsTitle.style.fontWeight = 'bold';
+    resultsTitle.style.marginBottom = '0px';
+    resultsTitle.style.textAlign = 'center';
+    resultsTitle.style.color = '#333';
+    resultsTitle.style.borderBottom = '2px solid #2bbfbd';
+    resultsTitle.style.paddingBottom = '8px';
 
-    // Chart section
-    const chartSection = document.createElement( 'div' );
-    chartSection.style.width = '100%';
-    chartSection.style.marginTop = '8px';
-    chartSection.style.boxSizing = 'border-box';
+    resultsDiv.style.fontSize = '16px';
+    resultsDiv.style.lineHeight = '1.6';
+    resultsDiv.style.padding = '10px';
+    resultsDiv.style.backgroundColor = 'transparent';
+    resultsDiv.style.borderRadius = '0';
+
+    resultsPanel.appendChild( resultsTitle );
+    resultsPanel.appendChild( resultsDiv );
+
+    // Create chart panel (right side, below results)
+    const chartPanel = document.createElement( 'div' );
+    chartPanel.style.position = 'absolute';
+    chartPanel.style.left = '480px';
+    chartPanel.style.top = '150px';
+    chartPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
+    chartPanel.style.height = '400px';
+    chartPanel.style.background = '#ffffff';
+    chartPanel.style.padding = '15px';
+    chartPanel.style.border = '2px solid #ccc';
+    chartPanel.style.borderRadius = '8px';
+    chartPanel.style.boxSizing = 'border-box';
+    chartPanel.style.pointerEvents = 'auto';
+    chartPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+
+    // Chart title
+    const chartTitle = document.createElement( 'div' );
+    chartTitle.textContent = 'Payment Breakdown by Year';
+    chartTitle.style.fontSize = '16px';
+    chartTitle.style.fontWeight = 'bold';
+    chartTitle.style.marginBottom = '10px';
+    chartTitle.style.textAlign = 'center';
+    chartTitle.style.color = '#333';
+    chartTitle.style.borderBottom = '2px solid #e05252';
+    chartTitle.style.paddingBottom = '8px';
+
+    // Chart canvas container
+    const chartCanvasContainer = document.createElement( 'div' );
+    chartCanvasContainer.style.width = '100%';
+    chartCanvasContainer.style.height = 'calc(100% - 35px)';
+    chartCanvasContainer.style.position = 'relative';
 
     const chartCanvas = document.createElement( 'canvas' );
     chartCanvas.style.width = '100%';
-    chartCanvas.style.height = '200px';
-    chartSection.appendChild( chartCanvas );
+    chartCanvas.style.height = '100%';
+    chartCanvasContainer.appendChild( chartCanvas );
 
-    uiWrapper.appendChild( topSection );
-    uiWrapper.appendChild( chartSection );
+    chartPanel.appendChild( chartTitle );
+    chartPanel.appendChild( chartCanvasContainer );
 
-    const uiNode = new DOM( uiWrapper, { left: 0, top: 40, tandem: options.tandem.createTandem( 'amortizationUI' ) } );
+    uiWrapper.appendChild( controlPanel );
+    uiWrapper.appendChild( resultsPanel );
+    uiWrapper.appendChild( chartPanel );
+
+    const uiNode = new DOM( uiWrapper, { 
+      left: 0, 
+      top: 0, 
+      tandem: options.tandem.createTandem( 'amortizationUI' ) 
+    } );
     this.addChild( uiNode );
 
     // Responsive layout
     const onResize = (): void => {
-      const w = Math.min( 720, Math.round( window.innerWidth * 0.95 ) );
-      uiWrapper.style.width = w + 'px';
-      if ( w < 560 ) {
-        topSection.style.flexDirection = 'column';
-        leftColumn.style.flex = '0 0 auto';
+      const vw = window.innerWidth;
+      
+      // Adjust layout for small screens
+      if ( vw < 800 ) {
+        // Stack panels vertically on small screens
+        controlPanel.style.position = 'relative';
+        controlPanel.style.left = '0';
+        controlPanel.style.width = '100%';
+        controlPanel.style.maxHeight = 'none';
+        
+        resultsPanel.style.position = 'relative';
+        resultsPanel.style.left = '0';
+        resultsPanel.style.width = '100%';
+        resultsPanel.style.marginTop = '15px';
+        
+        chartPanel.style.position = 'relative';
+        chartPanel.style.left = '0';
+        chartPanel.style.right = '0';
+        chartPanel.style.width = '100%';
+        chartPanel.style.marginTop = '15px';
+        
+        uiWrapper.style.padding = '15px';
       }
       else {
-        topSection.style.flexDirection = 'row';
-        leftColumn.style.flex = '0 0 280px';
+        // Side-by-side layout for larger screens
+        controlPanel.style.position = 'absolute';
+        controlPanel.style.left = '15px';
+        controlPanel.style.width = '450px';
+        controlPanel.style.maxHeight = 'calc(100% - 30px)';
+        
+        resultsPanel.style.position = 'absolute';
+        resultsPanel.style.left = '480px';
+        resultsPanel.style.top = '15px';
+        resultsPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
+        
+        chartPanel.style.position = 'absolute';
+        chartPanel.style.left = '480px';
+        chartPanel.style.top = '150px';
+        chartPanel.style.right = '15px';
+        chartPanel.style.marginTop = '0';
+        
+        uiWrapper.style.padding = '0';
       }
     };
     window.addEventListener( 'resize', onResize );
@@ -199,7 +310,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     let chartInstance: any = null;
 
     // View update function - observes model and updates UI
-    const updateView = async (): Promise<void> => {
+    const updateView = (): void => {
       const monthlyPayment = model.monthlyPaymentProperty.value;
       const totalInterest = model.totalInterestProperty.value;
       const totalPaid = model.totalPaidProperty.value;
@@ -212,7 +323,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       }
 
       // Update results display
-      resultsDiv.innerHTML = `Monthly payment: <strong>$${formatNumber( monthlyPayment )}</strong><br/>Total interest: <strong>$${formatNumber( totalInterest )}</strong><br/>Total paid: <strong>$${formatNumber( totalPaid )}</strong>`;
+      resultsDiv.innerHTML = `Total interest: <strong>$${formatNumber( totalInterest )}</strong><br/>Total paid: <strong>$${formatNumber( totalPaid )}</strong>`;
 
       // Update table
       tableContainer.innerHTML = '';
@@ -220,7 +331,6 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
       // Update chart
       try {
-        await loadChartJS;
         const Chart = ( window as any ).Chart;
         if ( Chart && schedule.length > 0 ) {
           const ctx = ( chartCanvas as HTMLCanvasElement ).getContext( '2d' );
@@ -288,6 +398,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       model.termYearsProperty.value = termYears;
       model.interestRateProperty.value = interestRate;
       model.computeSchedule();
+      updateView();
     };
 
     calculateButton.addEventListener( 'click', onCalculate );
@@ -295,11 +406,6 @@ export default class AmortizationCalcScreenView extends ScreenView {
       e.preventDefault();
       onCalculate();
     } );
-
-    // Observe model changes and update view
-    const scheduleListener = () => updateView();
-    model.scheduleArray.elementAddedEmitter.addListener( scheduleListener );
-    model.scheduleArray.elementRemovedEmitter.addListener( scheduleListener );
 
     // Initial render
     updateView();
@@ -320,8 +426,6 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Disposal
     this.disposeAmortizationCalcScreenView = () => {
-      model.scheduleArray.elementAddedEmitter.removeListener( scheduleListener );
-      model.scheduleArray.elementRemovedEmitter.removeListener( scheduleListener );
       window.removeEventListener( 'resize', onResize );
       calculateButton.removeEventListener( 'click', onCalculate );
       uiNode.dispose();

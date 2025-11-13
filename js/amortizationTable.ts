@@ -112,7 +112,7 @@ export function renderAmortizationTable( container: HTMLElement, schedule: Amort
   table.style.width = '100%';
   table.style.borderCollapse = 'collapse';
   table.style.marginTop = '20px';
-  table.style.fontSize = '12px';
+  table.style.fontSize = '16px';
   
   // Create header
   const header = document.createElement('thead');
