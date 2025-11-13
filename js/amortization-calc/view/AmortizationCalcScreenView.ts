@@ -60,6 +60,10 @@ export default class AmortizationCalcScreenView extends ScreenView {
     uiWrapper.style.height = layoutHeight + 'px';
     uiWrapper.style.pointerEvents = 'auto';
     uiWrapper.style.overflow = 'visible';
+    uiWrapper.style.backgroundImage = 'url(images/background.png)';
+    uiWrapper.style.backgroundSize = 'cover';
+    uiWrapper.style.backgroundPosition = 'center';
+    uiWrapper.style.backgroundRepeat = 'no-repeat';
     uiWrapper.tabIndex = 0;
 
     // Prevent pointer events from bubbling to Scenery
@@ -75,7 +79,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     controlPanel.style.top = '15px';
     controlPanel.style.width = '450px';
     controlPanel.style.maxHeight = ( layoutHeight - 30 ) + 'px';
-    controlPanel.style.background = '#ffffff';
+    controlPanel.style.background = '#f7f5f4';
     controlPanel.style.padding = '10px';
     controlPanel.style.border = '2px solid #ccc';
     controlPanel.style.borderRadius = '8px';
@@ -95,7 +99,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     controlTitle.style.marginBottom = '5px';
     controlTitle.style.textAlign = 'center';
     controlTitle.style.color = '#333';
-    controlTitle.style.borderBottom = '2px solid #2bbfbd';
+    controlTitle.style.borderBottom = '2px solid #0c2049';
     controlTitle.style.paddingBottom = '8px';
 
     // Build form
@@ -138,17 +142,17 @@ export default class AmortizationCalcScreenView extends ScreenView {
     calculateButton.style.padding = '10px 16px';
     calculateButton.style.fontSize = '16px';
     calculateButton.style.fontWeight = 'bold';
-    calculateButton.style.backgroundColor = '#2bbfbd';
+    calculateButton.style.backgroundColor = '#0c2049';
     calculateButton.style.color = 'white';
     calculateButton.style.border = 'none';
     calculateButton.style.borderRadius = '4px';
     calculateButton.style.cursor = 'pointer';
     calculateButton.addEventListener( 'click', stop );
     calculateButton.addEventListener( 'mouseenter', () => {
-      calculateButton.style.backgroundColor = '#239a98';
+      calculateButton.style.backgroundColor = '#081632';
     } );
     calculateButton.addEventListener( 'mouseleave', () => {
-      calculateButton.style.backgroundColor = '#2bbfbd';
+      calculateButton.style.backgroundColor = '#0c2049';
     } );
     form.appendChild( calculateButton );
 
@@ -179,7 +183,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     resultsPanel.style.left = '480px';
     resultsPanel.style.top = '15px';
     resultsPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
-    resultsPanel.style.background = '#ffffff';
+    resultsPanel.style.background = '#f7f5f4';
     resultsPanel.style.padding = '15px';
     resultsPanel.style.border = '2px solid #ccc';
     resultsPanel.style.borderRadius = '8px';
@@ -194,7 +198,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     resultsTitle.style.marginBottom = '0px';
     resultsTitle.style.textAlign = 'center';
     resultsTitle.style.color = '#333';
-    resultsTitle.style.borderBottom = '2px solid #2bbfbd';
+    resultsTitle.style.borderBottom = '2px solid #0c2049';
     resultsTitle.style.paddingBottom = '8px';
 
     resultsDiv.style.fontSize = '16px';
@@ -213,7 +217,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     chartPanel.style.top = '150px';
     chartPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
     chartPanel.style.height = '400px';
-    chartPanel.style.background = '#ffffff';
+    chartPanel.style.background = '#f7f5f4';
     chartPanel.style.padding = '15px';
     chartPanel.style.border = '2px solid #ccc';
     chartPanel.style.borderRadius = '8px';
@@ -229,7 +233,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     chartTitle.style.marginBottom = '10px';
     chartTitle.style.textAlign = 'center';
     chartTitle.style.color = '#333';
-    chartTitle.style.borderBottom = '2px solid #e05252';
+    chartTitle.style.borderBottom = '2px solid #0c2049';
     chartTitle.style.paddingBottom = '8px';
 
     // Chart canvas container
@@ -343,8 +347,8 @@ export default class AmortizationCalcScreenView extends ScreenView {
           const interestPercent = interestAmounts.map( ( v, i ) => totalAmounts[ i ] ? ( v / totalAmounts[ i ] ) * 100 : 0 );
 
           const datasets = [
-            { label: 'Principal', data: principalPercent, backgroundColor: '#2bbfbd', stack: 'combined' },
-            { label: 'Interest', data: interestPercent, backgroundColor: '#e05252', stack: 'combined' }
+            { label: 'Principal', data: principalPercent, backgroundColor: '#14bf96', stack: 'combined' },
+            { label: 'Interest', data: interestPercent, backgroundColor: '#ff751f', stack: 'combined' }
           ];
 
           const config = {

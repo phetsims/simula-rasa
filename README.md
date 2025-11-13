@@ -19,16 +19,23 @@ The Amortization Calculator is an educational simulation that helps users unders
 - **Interest Rate (Annual %)** — annual percentage rate (e.g., 5%)
 
 ### Output Display
-- **Monthly Payment** — formatted with thousands separators
-- **Total Interest Paid** — total interest over the life of the loan
-- **Total Paid** — total of all payments (principal + interest)
+
+**Loan Calculator Panel (Left)**
 - **Amortization Table** — scrollable table with sticky headers showing:
   - Payment number
   - Monthly payment amount
   - Principal paid that month
   - Interest paid that month
   - Remaining balance
-- **Chart** — (to be implemented) visual breakdown of principal vs. interest by year
+
+**Payment Summary Panel (Top Right)**
+- **Total Interest Paid** — total interest over the life of the loan
+- **Total Paid** — total of all payments (principal + interest)
+
+**Payment Breakdown Chart (Bottom Right)**
+- **Interactive stacked bar chart** — visualizes principal vs. interest by year
+- Hover tooltips showing detailed percentages and dollar amounts
+- Color-coded bars (mint for principal, coral for interest)
 
 ## Getting Started
 
@@ -115,11 +122,33 @@ All currency amounts use thousands separators (e.g., $1,234,567.89) for readabil
 ### Table Headers
 Table headers use CSS `position: sticky` to remain visible while scrolling through the amortization schedule.
 
-## Technologies
+## Architecture
 
-- **TypeScript** — type-safe implementation
-- **PhET Simulation Framework** — joist, scenery, sun, scenery-phet
-- **Chart.js** — (future) for data visualization
+### MVC Pattern (PhET Standards Compliant)
+The simulation follows PhET's strict Model-View-Controller pattern:
+
+**Model (`AmortizationCalcModel.ts`)**
+- Contains all application state using AXON Properties
+- Implements business logic (`computeSchedule()` method)
+- Properties: `loanAmountProperty`, `termYearsProperty`, `interestRateProperty`, `monthlyPaymentProperty`, `totalInterestProperty`, `totalPaidProperty`
+- Observable array: `scheduleArray` for amortization entries
+
+**View (`AmortizationCalcScreenView.ts`)**
+- Observes model Properties and updates UI
+- Three-panel layout: control panel, results panel, chart panel
+- Responsive design (stacks vertically on mobile)
+- No business logic — pure presentation
+
+**Controller Logic**
+- Event handlers update model Properties
+- Model computation triggers Property changes
+- View updates automatically via observers
+
+### Technologies
+
+- **TypeScript** — type-safe implementation with PhET conventions
+- **PhET Framework** — joist, scenery, axon (Properties, ObservableArray)
+- **Chart.js 3.9.1** — interactive data visualization
 - **Grunt** — build and development server
 - **ESBuild** — JavaScript bundling
 
@@ -141,14 +170,22 @@ The project uses ESLint for code quality checks:
 npx eslint js/
 ```
 
+## Design Features
+
+- **Custom color scheme** — Navy blue (`#0c2049`) accents with cream (`#f7f5f4`) panels
+- **Background image** — Custom `images/background.png` for visual appeal
+- **Separated panels** — Distinct visual regions following PhET standards
+- **16px font size** — Readable across all UI elements
+- **Instant calculations** — Optimized to avoid re-rendering overhead
+- **Smooth animations** — Chart transitions for visual feedback
+
 ## Future Enhancements
 
-- [ ] Chart visualization of principal vs. interest by year
 - [ ] Export schedule to CSV
 - [ ] Comparison mode (side-by-side loan scenarios)
 - [ ] Early payoff calculator
 - [ ] Extra payments visualization
-- [ ] Mobile responsive design improvements
+- [ ] Bi-weekly payment options
 
 ## Contributing
 
