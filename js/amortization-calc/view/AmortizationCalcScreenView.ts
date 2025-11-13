@@ -9,21 +9,21 @@
 import ScreenView, { ScreenViewOptions } from '../../../../joist/js/ScreenView.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
-import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
-import simulaRasa from '../../simulaRasa.js';
-import SimulaRasaModel from '../model/SimulaRasaModel.js';
+import AmortizationCalcConstants from '../../common/AmortizationCalcConstants.js';
+import amortizationCalc from '../../amortizationCalc.js';
+import AmortizationCalcModel from '../model/AmortizationCalcModel.js';
 
 type SelfOptions = {
- //TODO add options that are specific to SimulaRasaScreenView here
+ //TODO add options that are specific to AmortizationCalcScreenView here
 };
 
-type SimulaRasaScreenViewOptions = SelfOptions & ScreenViewOptions;
+type AmortizationCalcScreenViewOptions = SelfOptions & ScreenViewOptions;
 
-export default class SimulaRasaScreenView extends ScreenView {
+export default class AmortizationCalcScreenView extends ScreenView {
 
-  public constructor( model: SimulaRasaModel, providedOptions: SimulaRasaScreenViewOptions ) {
+  public constructor( model: AmortizationCalcModel, providedOptions: AmortizationCalcScreenViewOptions ) {
 
-    const options = optionize<SimulaRasaScreenViewOptions, SelfOptions, ScreenViewOptions>()( {
+    const options = optionize<AmortizationCalcScreenViewOptions, SelfOptions, ScreenViewOptions>()( {
 
       //TODO add default values for optional SelfOptions here
 
@@ -37,8 +37,8 @@ export default class SimulaRasaScreenView extends ScreenView {
         model.reset();
         this.reset();
       },
-      right: this.layoutBounds.maxX - SimulaRasaConstants.SCREEN_VIEW_X_MARGIN,
-      bottom: this.layoutBounds.maxY - SimulaRasaConstants.SCREEN_VIEW_Y_MARGIN,
+      right: this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN,
+      bottom: this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN,
       tandem: options.tandem.createTandem( 'resetAllButton' )
     } );
     this.addChild( resetAllButton );
@@ -60,4 +60,4 @@ export default class SimulaRasaScreenView extends ScreenView {
   }
 }
 
-simulaRasa.register( 'SimulaRasaScreenView', SimulaRasaScreenView );
+amortizationCalc.register( 'AmortizationCalcScreenView', AmortizationCalcScreenView );

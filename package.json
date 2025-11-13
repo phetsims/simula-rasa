@@ -1,10 +1,10 @@
 {
-  "name": "amortization_calculator",
+  "name": "amortization-calculator",
   "version": "1.0.0-dev.0",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BattleDrumz/amortization_calc.git"
+    "url": "git+https://github.com/BattleDrumz/amortization-calc.git"
   },
   "devDependencies": {
     "grunt": "~1.5.3"
@@ -34,7 +34,7 @@
   "keywords": [],
   "author": "",
   "bugs": {
-    "url": "https://github.com/phetsims/amortization_calc/issues"
+    "url": "https://github.com/phetsims/amortization-calc/issues"
   },
-  "homepage": "https://github.com/phetsims/amortization_calc#readme"
+  "homepage": "https://github.com/phetsims/amortization-calc#readme"
 }

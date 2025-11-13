@@ -15,15 +15,15 @@
  */
 
 import ProfileColorProperty from '../../../scenery/js/util/ProfileColorProperty.js';
-import simulaRasa from '../simulaRasa.js';
+import amortizationCalc from '../amortizationCalc.js';
 
-const SimulaRasaColors = {
+const AmortizationCalcColors = {
 
   // Background color for screens in this sim
-  screenBackgroundColorProperty: new ProfileColorProperty( simulaRasa, 'screenBackgroundColor', {
+  screenBackgroundColorProperty: new ProfileColorProperty( amortizationCalc, 'screenBackgroundColor', {
     default: 'white'
   } )
 };
 
-simulaRasa.register( 'SimulaRasaColors', SimulaRasaColors );
-export default SimulaRasaColors;
+amortizationCalc.register( 'AmortizationCalcColors', AmortizationCalcColors );
+export default AmortizationCalcColors;

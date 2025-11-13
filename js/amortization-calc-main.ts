@@ -9,9 +9,9 @@
 import Sim, { SimOptions } from '../../joist/js/Sim.js';
 import simLauncher from '../../joist/js/simLauncher.js';
 import Tandem from '../../tandem/js/Tandem.js';
-import SimulaRasaScreen from './simula-rasa/SimulaRasaScreen.js';
-import SimulaRasaStrings from './SimulaRasaStrings.js';
-import './common/SimulaRasaQueryParameters.js';
+import AmortizationCalcScreen from './amortization-calc/AmortizationCalcScreen.js';
+import AmortizationCalcStrings from './AmortizationCalcStrings.js';
+import './common/AmortizationCalcQueryParameters.js';
 import { computeAmortization, renderAmortizationTable } from './amortizationTable';
 
 
@@ -42,10 +42,10 @@ simLauncher.launch( () => {
   const schedule = computeAmortization( principal, annualRate, years );
   renderAmortizationTable( wrapper, schedule, 24 );
 })();
-  const titleStringProperty = SimulaRasaStrings[ 'simula-rasa' ].titleStringProperty;
+  const titleStringProperty = AmortizationCalcStrings[ 'amortization-calc' ].titleStringProperty;
 
   const screens = [
-    new SimulaRasaScreen( { tandem: Tandem.ROOT.createTandem( 'simulaRasaScreen' ) } )
+    new AmortizationCalcScreen( { tandem: Tandem.ROOT.createTandem( 'amortizationCalcScreen' ) } )
   ];
 
   const options: SimOptions = {

@@ -9,17 +9,17 @@
 
 import logGlobal from '../../../phet-core/js/logGlobal.js';
 import { QueryStringMachine } from '../../../query-string-machine/js/QueryStringMachineModule.js';
-import simulaRasa from '../simulaRasa.js';
+import amortizationCalc from '../amortizationCalc.js';
 
-const SimulaRasaQueryParameters = QueryStringMachine.getAll( {
+const AmortizationCalcQueryParameters = QueryStringMachine.getAll( {
   //TODO add schemas for query parameters
 } );
 
-simulaRasa.register( 'SimulaRasaQueryParameters', SimulaRasaQueryParameters );
+amortizationCalc.register( 'AmortizationCalcQueryParameters', AmortizationCalcQueryParameters );
 
 // Log query parameters
 logGlobal( 'phet.chipper.queryParameters' );
 logGlobal( 'phet.preloads.phetio.queryParameters' );
-logGlobal( 'phet.simulaRasa.SimulaRasaQueryParameters' );
+logGlobal( 'phet.amortizationCalc.AmortizationCalcQueryParameters' );
 
-export default SimulaRasaQueryParameters;
+export default AmortizationCalcQueryParameters;

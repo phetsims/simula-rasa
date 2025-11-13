@@ -9,17 +9,17 @@
 import TModel from '../../../../joist/js/TModel.js';
 import PickRequired from '../../../../phet-core/js/types/PickRequired.js';
 import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
-import simulaRasa from '../../simulaRasa.js';
+import amortizationCalc from '../../amortizationCalc.js';
 
 type SelfOptions = {
-  //TODO add options that are specific to SimulaRasaModel here
+  //TODO add options that are specific to AmortizationCalcModel here
 };
 
-type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 'tandem'>;
+type AmortizationCalcModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 'tandem'>;
 
-export default class SimulaRasaModel implements TModel {
+export default class AmortizationCalcModel implements TModel {
 
-  public constructor( providedOptions: SimulaRasaModelOptions ) {
+  public constructor( providedOptions: AmortizationCalcModelOptions ) {
     //TODO
   }
 
@@ -39,4 +39,4 @@ export default class SimulaRasaModel implements TModel {
   }
 }
 
-simulaRasa.register( 'SimulaRasaModel', SimulaRasaModel );
+amortizationCalc.register( 'AmortizationCalcModel', AmortizationCalcModel );

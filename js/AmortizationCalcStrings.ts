@@ -9,10 +9,10 @@
 
 import getStringModule from '../../chipper/js/browser/getStringModule.js';
 import type LocalizedStringProperty from '../../chipper/js/browser/LocalizedStringProperty.js';
-import simulaRasa from './simulaRasa.js';
+import amortizationCalc from './amortizationCalc.js';
 
 type StringsType = {
-  'simula-rasa': {
+  'amortization-calc': {
     'titleStringProperty': LocalizedStringProperty;
   };
   'screen': {
@@ -20,8 +20,8 @@ type StringsType = {
   }
 };
 
-const SimulaRasaStrings = getStringModule( 'SIMULA_RASA' ) as StringsType;
+const AmortizationCalcStrings = getStringModule( 'AMORTIZATION_CALC' ) as StringsType;
 
-simulaRasa.register( 'SimulaRasaStrings', SimulaRasaStrings );
+amortizationCalc.register( 'AmortizationCalcStrings', AmortizationCalcStrings );
 
-export default SimulaRasaStrings;
+export default AmortizationCalcStrings;
