@@ -1,8 +1,8 @@
 {
   "amortization-calc.title": {
-    "value": "{{TITLE}}"
+    "value": "Amortization Calculator"
   },
   "screen.name": {
-    "value": "{{TITLE}}"
+    "value": "Amortization Calculator"
   }
 }
