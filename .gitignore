@@ -1,5 +1,7 @@
 .idea/
 build/
+dist/
+chipper/dist/
 node_modules/
 *.iml
 .DS_Store
@@ -7,3 +9,11 @@ node_modules/
 *.sublime-project
 *.sublime-workspace
 .eslintcache
+.env
+*.log
+.vscode/settings.json
+*.swp
+*.swo
+*~
+.cache
+.parcel-cache

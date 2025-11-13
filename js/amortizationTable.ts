@@ -1,19 +1,40 @@
-// Copyright 2014-2022, University of Colorado Boulder
+// Copyright 2014-2025, University of Colorado Boulder
 
 /**
- * Functions for computing and rendering an amortization table.
+ * Utility functions for amortization calculations and data formatting.
+ * These are pure functions with no side effects, used by the model and view.
  *
- * @author {{AUTHOR}}
+ * @author Luke Thorne
  */
 
 /**
- * Computes an amortization schedule.
- * @param principal - The loan principal amount
+ * Represents a single entry in the amortization schedule.
+ */
+export type AmortizationEntry = {
+  paymentNumber: number;
+  payment: number;
+  principal: number;
+  interest: number;
+  balance: number;
+};
+
+/**
+ * Represents a yearly summary of principal and interest payments.
+ */
+export type YearlySummary = {
+  year: number;
+  principalPaid: number;
+  interestPaid: number;
+};
+
+/**
+ * Computes an amortization schedule for a loan.
+ * @param principal - The loan principal amount in dollars
  * @param annualRate - The annual interest rate (as a decimal, e.g., 0.05 for 5%)
  * @param years - The loan term in years
- * @returns An array of payment objects
+ * @returns An array of amortization entries, one per month
  */
-export function computeAmortization( principal: number, annualRate: number, years: number ) {
+export function computeAmortization( principal: number, annualRate: number, years: number ): AmortizationEntry[] {
   const monthlyRate = annualRate / 12;
   const numberOfPayments = years * 12;
   
@@ -48,11 +69,11 @@ export function computeAmortization( principal: number, annualRate: number, year
 }
 
 /**
- * Aggregates amortization schedule data by year (12 consecutive months per year).
+ * Aggregates amortization schedule data by year (groups 12 consecutive months per year).
  * @param schedule - The amortization schedule array
- * @returns An array of yearly summaries: { year, principalPaid, interestPaid }
+ * @returns An array of yearly summaries with total principal and interest paid per year
  */
-export function aggregateByYear( schedule: any[] ) {
+export function aggregateByYear( schedule: AmortizationEntry[] ): YearlySummary[] {
   const yearlyData = [];
   for (let year = 1; year <= Math.ceil(schedule.length / 12); year++) {
     const startIdx = (year - 1) * 12;
@@ -68,19 +89,22 @@ export function aggregateByYear( schedule: any[] ) {
 }
 
 /**
- * Formats a number with thousands separators (e.g., 1000 -> '1,000.00').
+ * Formats a number with thousands separators and two decimal places.
+ * @param num - The number to format
+ * @returns Formatted string (e.g., 1000.5 -> '1,000.50')
  */
 export function formatNumber( num: number ): string {
-  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return num.toLocaleString( 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 } );
 }
 
 /**
- * Renders an amortization table in the DOM.
+ * Renders an amortization table as a DOM table element inside a container.
+ * This is a view utility that creates the table structure with sticky headers.
  * @param container - The DOM element to render the table into
  * @param schedule - The amortization schedule array
- * @param showRows - The number of rows to show (optional, defaults to all)
+ * @param showRows - Optional number of rows to display (defaults to all)
  */
-export function renderAmortizationTable( container: HTMLElement, schedule: any[], showRows?: number ) {
+export function renderAmortizationTable( container: HTMLElement, schedule: AmortizationEntry[], showRows?: number ): void {
   const rowsToShow = showRows || schedule.length;
   
   // Create table
@@ -96,7 +120,7 @@ export function renderAmortizationTable( container: HTMLElement, schedule: any[]
   headerRow.style.backgroundColor = '#f0f0f0';
   headerRow.style.borderBottom = '2px solid #ccc';
   
-  const headers = ['Payment #', 'Payment', 'Principal', 'Interest', 'Balance'];
+  const headers = ['Month #', 'Payment', 'Principal', 'Interest', 'Balance'];
   headers.forEach(headerText => {
     const th = document.createElement('th');
     th.textContent = headerText;
