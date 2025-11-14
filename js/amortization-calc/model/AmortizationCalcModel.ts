@@ -30,14 +30,20 @@ export default class AmortizationCalcModel implements TModel {
   public readonly loanAmountProperty: NumberProperty;
   public readonly termYearsProperty: NumberProperty;
   public readonly interestRateProperty: NumberProperty;
+  public readonly extraMonthlyPaymentProperty: NumberProperty;
 
-  // Computed values
+  // Computed values for standard payments
   public readonly monthlyPaymentProperty: Property<number>;
   public readonly totalInterestProperty: Property<number>;
   public readonly totalPaidProperty: Property<number>;
-
-  // Amortization schedule
   public readonly scheduleArray: ObservableArray<AmortizationEntry>;
+
+  // Computed values for scenario with extra payments
+  public readonly totalInterestWithExtraProperty: Property<number>;
+  public readonly totalPaidWithExtraProperty: Property<number>;
+  public readonly monthsSavedProperty: Property<number>;
+  public readonly interestSavedProperty: Property<number>;
+  public readonly scheduleWithExtraArray: ObservableArray<AmortizationEntry>;
 
   public constructor( providedOptions: AmortizationCalcModelOptions ) {
 
@@ -57,7 +63,12 @@ export default class AmortizationCalcModel implements TModel {
       phetioDocumentation: 'The annual interest rate as a percentage'
     } );
 
-    // Initialize computed properties
+    this.extraMonthlyPaymentProperty = new NumberProperty( 0, {
+      tandem: providedOptions.tandem.createTandem( 'extraMonthlyPaymentProperty' ),
+      phetioDocumentation: 'Extra amount paid each month towards principal'
+    } );
+
+    // Initialize computed properties for standard payments
     this.monthlyPaymentProperty = new Property<number>( 0, {
       tandem: providedOptions.tandem.createTandem( 'monthlyPaymentProperty' ),
       phetioDocumentation: 'The monthly payment amount in dollars',
@@ -78,6 +89,33 @@ export default class AmortizationCalcModel implements TModel {
 
     // Initialize amortization schedule as an observable array
     this.scheduleArray = createObservableArray<AmortizationEntry>();
+
+    // Initialize properties for extra payment scenario
+    this.totalInterestWithExtraProperty = new Property<number>( 0, {
+      tandem: providedOptions.tandem.createTandem( 'totalInterestWithExtraProperty' ),
+      phetioDocumentation: 'Total interest with extra payments',
+      phetioValueType: NumberIO
+    } );
+
+    this.totalPaidWithExtraProperty = new Property<number>( 0, {
+      tandem: providedOptions.tandem.createTandem( 'totalPaidWithExtraProperty' ),
+      phetioDocumentation: 'Total paid with extra payments',
+      phetioValueType: NumberIO
+    } );
+
+    this.monthsSavedProperty = new Property<number>( 0, {
+      tandem: providedOptions.tandem.createTandem( 'monthsSavedProperty' ),
+      phetioDocumentation: 'Number of months saved by making extra payments',
+      phetioValueType: NumberIO
+    } );
+
+    this.interestSavedProperty = new Property<number>( 0, {
+      tandem: providedOptions.tandem.createTandem( 'interestSavedProperty' ),
+      phetioDocumentation: 'Amount of interest saved by making extra payments',
+      phetioValueType: NumberIO
+    } );
+
+    this.scheduleWithExtraArray = createObservableArray<AmortizationEntry>();
 
     // Compute initial schedule
     this.computeSchedule();
@@ -109,7 +147,7 @@ export default class AmortizationCalcModel implements TModel {
     this.scheduleArray.clear();
     schedule.forEach( entry => this.scheduleArray.push( entry ) );
 
-    // Update computed properties
+    // Update computed properties for standard scenario
     const monthlyPayment = schedule.length > 0 ? schedule[ 0 ].payment : 0;
     const totalInterest = schedule.reduce( ( sum, entry ) => sum + entry.interest, 0 );
     const numberOfPayments = years * 12;
@@ -118,6 +156,29 @@ export default class AmortizationCalcModel implements TModel {
     this.monthlyPaymentProperty.value = monthlyPayment;
     this.totalInterestProperty.value = totalInterest;
     this.totalPaidProperty.value = totalPaid;
+
+    // Compute scenario with extra payments
+    const extraPayment = this.extraMonthlyPaymentProperty.value;
+    if ( extraPayment > 0 ) {
+      const scheduleWithExtra = computeAmortization( principal, annualRate, years, extraPayment );
+      this.scheduleWithExtraArray.clear();
+      scheduleWithExtra.forEach( entry => this.scheduleWithExtraArray.push( entry ) );
+
+      const totalInterestWithExtra = scheduleWithExtra.reduce( ( sum, entry ) => sum + entry.interest, 0 );
+      const totalPaidWithExtra = scheduleWithExtra.reduce( ( sum, entry ) => sum + entry.payment, 0 );
+
+      this.totalInterestWithExtraProperty.value = totalInterestWithExtra;
+      this.totalPaidWithExtraProperty.value = totalPaidWithExtra;
+      this.monthsSavedProperty.value = schedule.length - scheduleWithExtra.length;
+      this.interestSavedProperty.value = totalInterest - totalInterestWithExtra;
+    } else {
+      // No extra payment - clear the extra scenario
+      this.scheduleWithExtraArray.clear();
+      this.totalInterestWithExtraProperty.value = 0;
+      this.totalPaidWithExtraProperty.value = 0;
+      this.monthsSavedProperty.value = 0;
+      this.interestSavedProperty.value = 0;
+    }
   }
 
   /**
@@ -127,6 +188,7 @@ export default class AmortizationCalcModel implements TModel {
     this.loanAmountProperty.reset();
     this.termYearsProperty.reset();
     this.interestRateProperty.reset();
+    this.extraMonthlyPaymentProperty.reset();
     this.computeSchedule();
   }
 
