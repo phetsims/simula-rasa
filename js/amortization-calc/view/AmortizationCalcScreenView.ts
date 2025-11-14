@@ -13,6 +13,7 @@ import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
 import PhetFont from '../../../../scenery-phet/js/PhetFont.js';
 import NumberControl from '../../../../scenery-phet/js/NumberControl.js';
+import AquaRadioButtonGroup from '../../../../sun/js/AquaRadioButtonGroup.js';
 import RectangularPushButton from '../../../../sun/js/buttons/RectangularPushButton.js';
 import VBox from '../../../../scenery/js/layout/nodes/VBox.js';
 import HBox from '../../../../scenery/js/layout/nodes/HBox.js';
@@ -96,28 +97,26 @@ export default class AmortizationCalcScreenView extends ScreenView {
       tandem: options.tandem.createTandem( 'loanAmountControl' )
     } );
 
-    // Create NumberControl for Term Years
-    const termYearsControl = new NumberControl( 'Term (years):', model.termYearsProperty, new Range( 1, 50 ), {
-      delta: 1,
-      numberDisplayOptions: {
-        decimalPlaces: 0,
-        align: 'right',
-        xMargin: 10,
-        yMargin: 5,
-        textOptions: {
-          font: LABEL_FONT
-        }
+    // Create radio button group for Term Years (15 or 30)
+    const termYearsLabel = new Text( 'Term:', {
+      font: LABEL_FONT
+    } );
+    
+    const termYearsRadioButtonGroup = new AquaRadioButtonGroup( model.termYearsProperty, [
+      { value: 15, createNode: () => new Text( '15 years', { font: LABEL_FONT } ), tandemName: 'fifteenYearsRadioButton' },
+      { value: 30, createNode: () => new Text( '30 years', { font: LABEL_FONT } ), tandemName: 'thirtyYearsRadioButton' }
+    ], {
+      spacing: 8,
+      radioButtonOptions: {
+        radius: 8
       },
-      sliderOptions: {
-        majorTickLength: 10,
-        trackSize: new Dimension2( 180, 3 )
-      },
-      titleNodeOptions: {
-        font: LABEL_FONT,
-        maxWidth: 150
-      },
-      layoutFunction: NumberControl.createLayoutFunction4(),
-      tandem: options.tandem.createTandem( 'termYearsControl' )
+      tandem: options.tandem.createTandem( 'termYearsRadioButtonGroup' )
+    } );
+    
+    const termYearsControl = new VBox( {
+      children: [ termYearsLabel, termYearsRadioButtonGroup ],
+      spacing: 5,
+      align: 'left'
     } );
 
     // Create NumberControl for Interest Rate
@@ -310,86 +309,129 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
       if ( schedule.length === 0 ) return;
 
-      // Calculate cumulative amounts
-      let cumulativePrincipal = 0;
-      let cumulativeInterest = 0;
-      const dataPoints: { month: number; principal: number; interest: number }[] = [];
+      // Calculate totals for labels (AmortizationEntry uses 'principal' and 'interest' fields)
+      const totalPrincipal = schedule.reduce( ( sum, entry ) => sum + ( entry.principal || 0 ), 0 );
+      const totalInterest = schedule.reduce( ( sum, entry ) => sum + ( entry.interest || 0 ), 0 );
       
-      schedule.forEach( ( entry, index ) => {
-        cumulativePrincipal += entry.principal;
-        cumulativeInterest += entry.interest;
-        dataPoints.push( {
-          month: index + 1,
-          principal: cumulativePrincipal,
-          interest: cumulativeInterest
-        } );
+      // Use the loan term for x-axis (fixed scale in months)
+      const termYears = model.termYearsProperty.value;
+      const termMonths = termYears * 12;
+      
+      // Sample data points for performance - use every Nth month, plus first and last
+      const sampleRate = Math.max( 1, Math.floor( schedule.length / 60 ) ); // Max 60 points
+      const sampledIndices: number[] = [ 0 ]; // Always include first point
+      for ( let i = sampleRate; i < schedule.length - 1; i += sampleRate ) {
+        sampledIndices.push( i );
+      }
+      
+      // Include last point only if it's not an anomalous final payment
+      // (Final payment is often very small, causing visual artifacts)
+      if ( schedule.length > 2 ) {
+        const lastIdx = schedule.length - 1;
+        const secondLastIdx = schedule.length - 2;
+        const lastPrincipal = schedule[ lastIdx ].principal || 0;
+        const secondLastPrincipal = schedule[ secondLastIdx ].principal || 0;
+        
+        // Only include last point if it's similar to second-to-last (not a tiny final payment)
+        if ( lastPrincipal > secondLastPrincipal * 0.5 ) {
+          sampledIndices.push( lastIdx );
+        } else if ( !sampledIndices.includes( secondLastIdx ) ) {
+          // Use second-to-last instead
+          sampledIndices.push( secondLastIdx );
+        }
+      }
+      
+      // Find max amount for scaling
+      const amounts = schedule.map( entry => {
+        const principal = entry.principal || 0;
+        const interest = entry.interest || 0;
+        return Math.max( principal, interest );
       } );
+      const maxAmount = Math.max( ...amounts, 1 );
+      
+      const xScale = ( graphWidth - 70 ) / termMonths;
+      const yScale = ( graphHeight - 50 ) / maxAmount;
+      const padding = 40;
 
-      const maxMonth = dataPoints.length;
-      const maxTotal = cumulativePrincipal + cumulativeInterest;
-      const xScale = graphWidth / maxMonth;
-      const yScale = graphHeight / maxTotal;
-      const padding = 5;
-
-      // Create interest area path (bottom, orange)
+      // Create interest line path (orange, decreasing over time)
       const interestShape = new Shape();
-      interestShape.moveTo( padding, graphHeight - padding );
-      dataPoints.forEach( ( point, index ) => {
-        const x = padding + point.month * xScale;
-        const y = graphHeight - padding - point.interest * yScale;
-        if ( index === 0 ) {
-          interestShape.lineTo( x, y );
-        } else {
+      if ( sampledIndices.length > 0 ) {
+        const firstIdx = sampledIndices[ 0 ];
+        const startX = padding + ( firstIdx + 0.5 ) * xScale;
+        const startY = graphHeight - padding - schedule[ firstIdx ].interest * yScale;
+        interestShape.moveTo( startX, startY );
+        
+        for ( let i = 1; i < sampledIndices.length; i++ ) {
+          const idx = sampledIndices[ i ];
+          const x = padding + ( idx + 0.5 ) * xScale;
+          const y = graphHeight - padding - schedule[ idx ].interest * yScale;
           interestShape.lineTo( x, y );
         }
-      } );
-      interestShape.lineTo( padding + maxMonth * xScale, graphHeight - padding );
-      interestShape.close();
+      }
 
       const interestPath = new Path( interestShape, {
-        fill: new LinearGradient( 0, 0, 0, graphHeight )
-          .addColorStop( 0, 'rgba(232, 116, 59, 0.8)' )
-          .addColorStop( 1, 'rgba(232, 116, 59, 0.3)' ),
         stroke: '#e8743b',
         lineWidth: 2
       } );
       container.addChild( interestPath );
 
-      // Create total (principal + interest) area path (top, green)
-      const totalShape = new Shape();
-      totalShape.moveTo( padding, graphHeight - padding );
-      dataPoints.forEach( ( point, index ) => {
-        const x = padding + point.month * xScale;
-        const y = graphHeight - padding - ( point.principal + point.interest ) * yScale;
-        if ( index === 0 ) {
-          totalShape.lineTo( x, y );
-        } else {
-          totalShape.lineTo( x, y );
+      // Create principal line path (green, increasing over time)
+      const principalShape = new Shape();
+      if ( sampledIndices.length > 0 ) {
+        const firstIdx = sampledIndices[ 0 ];
+        const startX = padding + ( firstIdx + 0.5 ) * xScale;
+        const startY = graphHeight - padding - schedule[ firstIdx ].principal * yScale;
+        principalShape.moveTo( startX, startY );
+        
+        for ( let i = 1; i < sampledIndices.length; i++ ) {
+          const idx = sampledIndices[ i ];
+          const x = padding + ( idx + 0.5 ) * xScale;
+          const y = graphHeight - padding - schedule[ idx ].principal * yScale;
+          principalShape.lineTo( x, y );
         }
-      } );
-      totalShape.lineTo( padding + maxMonth * xScale, graphHeight - padding );
-      totalShape.close();
+      }
 
-      const totalPath = new Path( totalShape, {
-        fill: new LinearGradient( 0, 0, 0, graphHeight )
-          .addColorStop( 0, 'rgba(25, 169, 121, 0.8)' )
-          .addColorStop( 1, 'rgba(25, 169, 121, 0.3)' ),
+      const principalPath = new Path( principalShape, {
         stroke: '#19a979',
         lineWidth: 2
       } );
-      container.addChild( totalPath );
+      container.addChild( principalPath );
 
       // Add axis lines
       const xAxis = new Line( padding, graphHeight - padding, graphWidth - padding, graphHeight - padding, {
         stroke: '#333',
-        lineWidth: 1
+        lineWidth: 2
       } );
       const yAxis = new Line( padding, padding, padding, graphHeight - padding, {
         stroke: '#333',
-        lineWidth: 1
+        lineWidth: 2
       } );
       container.addChild( xAxis );
       container.addChild( yAxis );
+      
+      // Add year markers on x-axis - positioned at 12-month intervals
+      for ( let year = 1; year <= termYears; year++ ) {
+        const monthNumber = year * 12;
+        const x = padding + ( monthNumber - 0.5 ) * xScale;
+        
+        // Show year labels at reasonable intervals
+        if ( year === 1 || year === termYears || year % 5 === 0 ) {
+          const yearLabel = new Text( `${year}`, {
+            font: new PhetFont( 9 ),
+            fill: '#333',
+            centerX: x,
+            top: graphHeight - padding + 5
+          } );
+          container.addChild( yearLabel );
+        }
+        
+        // Add tick marks for every year
+        const tickMark = new Line( x, graphHeight - padding, x, graphHeight - padding + 3, {
+          stroke: '#333',
+          lineWidth: 1
+        } );
+        container.addChild( tickMark );
+      }
 
       // Add labels
       const legendText = new Text( 'Green: Principal | Orange: Interest', {
@@ -401,7 +443,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       container.addChild( legendText );
 
       // Add final value labels
-      const finalPrincipalText = new Text( `Principal: $${formatNumber( cumulativePrincipal )}`, {
+      const finalPrincipalText = new Text( `Principal: $${formatNumber( totalPrincipal )}`, {
         font: new PhetFont( { size: 12, weight: 'bold' } ),
         fill: '#19a979',
         right: graphWidth - padding - 5,
@@ -409,7 +451,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       } );
       container.addChild( finalPrincipalText );
 
-      const finalInterestText = new Text( `Interest: $${formatNumber( cumulativeInterest )}`, {
+      const finalInterestText = new Text( `Interest: $${formatNumber( totalInterest )}`, {
         font: new PhetFont( { size: 12, weight: 'bold' } ),
         fill: '#e8743b',
         right: graphWidth - padding - 5,
@@ -417,7 +459,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       } );
       container.addChild( finalInterestText );
 
-      const totalText = new Text( `Total: $${formatNumber( cumulativePrincipal + cumulativeInterest )}`, {
+      const totalText = new Text( `Total: $${formatNumber( totalPrincipal + totalInterest )}`, {
         font: new PhetFont( { size: 13, weight: 'bold' } ),
         fill: '#333',
         right: graphWidth - padding - 5,
@@ -530,10 +572,12 @@ export default class AmortizationCalcScreenView extends ScreenView {
       }
     };
 
-    // Listen to model changes
+    // Listen to model changes - need to watch BOTH schedules
     const scheduleListener = () => updateView();
     model.scheduleArray.elementAddedEmitter.addListener( scheduleListener );
     model.scheduleArray.elementRemovedEmitter.addListener( scheduleListener );
+    model.scheduleWithExtraArray.elementAddedEmitter.addListener( scheduleListener );
+    model.scheduleWithExtraArray.elementRemovedEmitter.addListener( scheduleListener );
 
     // Initial render
     updateView();
@@ -554,12 +598,14 @@ export default class AmortizationCalcScreenView extends ScreenView {
     this.disposeAmortizationCalcScreenView = () => {
       model.scheduleArray.elementAddedEmitter.removeListener( scheduleListener );
       model.scheduleArray.elementRemovedEmitter.removeListener( scheduleListener );
+      model.scheduleWithExtraArray.elementAddedEmitter.removeListener( scheduleListener );
+      model.scheduleWithExtraArray.elementRemovedEmitter.removeListener( scheduleListener );
       controlPanelContent.dispose();
       standardGraphContent.dispose();
       extraGraphContent.dispose();
       resetAllButton.dispose();
       loanAmountControl.dispose();
-      termYearsControl.dispose();
+      termYearsRadioButtonGroup.dispose();
       interestRateControl.dispose();
       calculateButton.dispose();
       extraPaymentControl.dispose();
