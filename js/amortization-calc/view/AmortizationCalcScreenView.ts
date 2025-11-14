@@ -74,8 +74,8 @@ export default class AmortizationCalcScreenView extends ScreenView {
     } );
 
     // Create NumberControl for Loan Amount
-    const loanAmountControl = new NumberControl( 'Loan Amount ($):', model.loanAmountProperty, new Range( 1000, 10000000 ), {
-      delta: 1000,
+    const loanAmountControl = new NumberControl( 'Loan Amount ($):', model.loanAmountProperty, new Range( 10000, 1000000 ), {
+      delta: 10000,
       numberDisplayOptions: {
         decimalPlaces: 0,
         align: 'right',
