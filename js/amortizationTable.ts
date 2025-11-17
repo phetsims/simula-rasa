@@ -32,9 +32,10 @@ export type YearlySummary = {
  * @param principal - The loan principal amount in dollars
  * @param annualRate - The annual interest rate (as a decimal, e.g., 0.05 for 5%)
  * @param years - The loan term in years
+ * @param extraMonthlyPayment - Optional extra payment towards principal each month
  * @returns An array of amortization entries, one per month
  */
-export function computeAmortization( principal: number, annualRate: number, years: number ): AmortizationEntry[] {
+export function computeAmortization( principal: number, annualRate: number, years: number, extraMonthlyPayment: number = 0 ): AmortizationEntry[] {
   const monthlyRate = annualRate / 12;
   const numberOfPayments = years * 12;
   
@@ -45,24 +46,34 @@ export function computeAmortization( principal: number, annualRate: number, year
   
   const schedule = [];
   let balance = principal;
+  let paymentNumber = 1;
   
-  for (let i = 1; i <= numberOfPayments; i++) {
+  // Continue until loan is paid off (handles extra payments that shorten loan term)
+  while ( balance > 0.01 && paymentNumber <= numberOfPayments * 2 ) {
     const interestPayment = balance * monthlyRate;
-    const principalPayment = monthlyPayment - interestPayment;
+    let principalPayment = monthlyPayment - interestPayment + extraMonthlyPayment;
+    
+    // Last payment: don't overpay
+    if ( principalPayment > balance ) {
+      principalPayment = balance;
+    }
+    
     balance -= principalPayment;
     
     // Avoid negative balance due to rounding
-    if (balance < 0) {
+    if ( balance < 0.01 ) {
       balance = 0;
     }
     
     schedule.push({
-      paymentNumber: i,
-      payment: monthlyPayment,
+      paymentNumber: paymentNumber,
+      payment: monthlyPayment + extraMonthlyPayment,
       principal: principalPayment,
       interest: interestPayment,
       balance: balance
     });
+    
+    paymentNumber++;
   }
   
   return schedule;

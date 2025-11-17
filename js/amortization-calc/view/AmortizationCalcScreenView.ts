@@ -2,8 +2,8 @@
 
 /**
  * AmortizationCalcScreenView is the top-level view for the Amortization Calculator screen.
- * It observes the model and updates the visual representation accordingly, following PhET's MVC pattern.
- * User input is forwarded to the model via Property setters.
+ * Fully refactored to use PhET scene graph components (Panel, NumberControl, VBox, HBox, Text, RectangularPushButton)
+ * while keeping Chart.js and data table as DOM nodes for performance (360+ rows).
  *
  * @author Luke Thompson
  */
@@ -11,7 +11,30 @@
 import ScreenView, { ScreenViewOptions } from '../../../../joist/js/ScreenView.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
-import DOM from '../../../../scenery/js/nodes/DOM.js';
+import PhetFont from '../../../../scenery-phet/js/PhetFont.js';
+import NumberControl from '../../../../scenery-phet/js/NumberControl.js';
+import NumberProperty from '../../../../axon/js/NumberProperty.js';
+import AquaRadioButtonGroup from '../../../../sun/js/AquaRadioButtonGroup.js';
+import Panel from '../../../../sun/js/Panel.js';
+import RectangularPushButton from '../../../../sun/js/buttons/RectangularPushButton.js';
+import VBox from '../../../../scenery/js/layout/nodes/VBox.js';
+import HBox from '../../../../scenery/js/layout/nodes/HBox.js';
+import Text from '../../../../scenery/js/nodes/Text.js';
+import Node from '../../../../scenery/js/nodes/Node.js';
+import Rectangle from '../../../../scenery/js/nodes/Rectangle.js';
+import Range from '../../../../dot/js/Range.js';
+import Color from '../../../../scenery/js/util/Color.js';
+import Dimension2 from '../../../../dot/js/Dimension2.js';
+import ChartTransform from '../../../../bamboo/js/ChartTransform.js';
+import ChartRectangle from '../../../../bamboo/js/ChartRectangle.js';
+import CanvasLinePlot from '../../../../bamboo/js/CanvasLinePlot.js';
+import ChartCanvasNode from '../../../../bamboo/js/ChartCanvasNode.js';
+import AxisLine from '../../../../bamboo/js/AxisLine.js';
+import GridLineSet from '../../../../bamboo/js/GridLineSet.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
+import Circle from '../../../../scenery/js/nodes/Circle.js';
+import Line from '../../../../scenery/js/nodes/Line.js';
 import { renderAmortizationTable, formatNumber, aggregateByYear } from '../../amortizationTable.js';
 import AmortizationCalcConstants from '../../common/AmortizationCalcConstants.js';
 import amortizationCalc from '../../amortizationCalc.js';
@@ -20,10 +43,48 @@ import AmortizationCalcModel from '../model/AmortizationCalcModel.js';
 type SelfOptions = EmptySelfOptions;
 type AmortizationCalcScreenViewOptions = SelfOptions & ScreenViewOptions;
 
+// Constants for the view
+const PANEL_FILL = new Color( '#f7f5f4' );
+const ACCENT_COLOR = new Color( '#0c2049' );
+const TITLE_FONT = new PhetFont( { size: 18, weight: 'bold' } );
+const LABEL_FONT = new PhetFont( 14 );
+const RESULTS_FONT = new PhetFont( 18 );
+const CONTROL_PANEL_WIDTH = 300;
+
 export default class AmortizationCalcScreenView extends ScreenView {
 
   private readonly model: AmortizationCalcModel;
   private readonly disposeAmortizationCalcScreenView: () => void;
+  private readonly resultsText: Text;
+  private readonly comparisonText: Text;
+  private readonly combinedGraphContainer: Node;
+  private readonly graphTitleText: Text;
+  private readonly graphInfoBox: VBox;
+  private readonly extraPaymentControl: NumberControl;
+  private readonly extraPaymentPanel: Panel;
+  private readonly calculateButton: RectangularPushButton;
+  private readonly chartNode: Node;
+  private readonly chartTransform: ChartTransform;
+  private chartCanvasNode: ChartCanvasNode | null = null;
+  private standardInterestPlot: CanvasLinePlot | null = null;
+  private standardPrincipalPlot: CanvasLinePlot | null = null;
+  private extraInterestPlot: CanvasLinePlot | null = null;
+  private extraPrincipalPlot: CanvasLinePlot | null = null;
+  private animationProgress: NumberProperty = new NumberProperty( 0 );
+  private fullStandardInterestData: Vector2[] = [];
+  private fullStandardPrincipalData: Vector2[] = [];
+  private fullExtraInterestData: Vector2[] = [];
+  private fullExtraPrincipalData: Vector2[] = [];
+  private isAnimating: boolean = false;
+  private standardLinesDrawn: boolean = false;
+  private cursorLine: Line | null = null;
+  private principalCircle: Circle | null = null;
+  private interestCircle: Circle | null = null;
+  private principalTooltip: Panel | null = null;
+  private interestTooltip: Panel | null = null;
+  private chartHitArea: Rectangle | null = null;
+  private activeSchedule: any[] = [];
+  private monthLabel: Panel | null = null;
 
   public constructor( model: AmortizationCalcModel, providedOptions: AmortizationCalcScreenViewOptions ) {
 
@@ -35,392 +96,673 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     this.model = model;
 
-    // Load Chart.js from CDN
-    const chartJsUrl = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
-    const loadChartJS: Promise<void> = new Promise( ( resolve, reject ) => {
-      if ( ( window as any ).Chart ) {
-        resolve();
-        return;
-      }
-      const script = document.createElement( 'script' );
-      script.src = chartJsUrl;
-      script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject( new Error( 'Failed to load Chart.js' ) );
-      document.head.appendChild( script );
+    // Title for control panel
+    const controlTitleText = new Text( 'Loan Explorer', {
+      font: TITLE_FONT,
+      fill: ACCENT_COLOR,
+      tandem: options.tandem.createTandem( 'controlTitleText' )
     } );
 
-    // Create UI container
-    const uiWrapper = document.createElement( 'div' );
-    const layoutWidth = this.layoutBounds.width;
-    const layoutHeight = this.layoutBounds.height;
+    // Create NumberControl for Loan Amount
+    const loanAmountControl = new NumberControl( 'Loan Amount ($):', model.loanAmountProperty, new Range( 10000, 1000000 ), {
+      delta: 10000,
+      numberDisplayOptions: {
+        decimalPlaces: 0,
+        align: 'right',
+        xMargin: 10,
+        yMargin: 5,
+        textOptions: {
+          font: LABEL_FONT
+        }
+      },
+      sliderOptions: {
+        majorTickLength: 10,
+        trackSize: new Dimension2( 180, 3 )
+      },
+      titleNodeOptions: {
+        font: LABEL_FONT,
+        maxWidth: 200
+      },
+      layoutFunction: NumberControl.createLayoutFunction4(),
+      tandem: options.tandem.createTandem( 'loanAmountControl' )
+    } );
+
+    // Create radio button group for Term Years (15 or 30)
+    const termYearsLabel = new Text( 'Term:', {
+      font: LABEL_FONT
+    } );
     
-    uiWrapper.style.position = 'relative';
-    uiWrapper.style.width = layoutWidth + 'px';
-    uiWrapper.style.height = layoutHeight + 'px';
-    uiWrapper.style.pointerEvents = 'auto';
-    uiWrapper.style.overflow = 'visible';
-    uiWrapper.style.backgroundImage = 'url(images/background.png)';
-    uiWrapper.style.backgroundSize = 'cover';
-    uiWrapper.style.backgroundPosition = 'center';
-    uiWrapper.style.backgroundRepeat = 'no-repeat';
-    uiWrapper.tabIndex = 0;
-
-    // Prevent pointer events from bubbling to Scenery
-    const stop = ( e: Event ) => {
-      e.stopPropagation();
-    };
-    [ 'pointerdown', 'pointermove', 'pointerup', 'mousedown', 'mousemove', 'mouseup', 'click' ].forEach( ev => uiWrapper.addEventListener( ev, stop ) );
-
-    // Create control panel (left side) for form, results, and table
-    const controlPanel = document.createElement( 'div' );
-    controlPanel.style.position = 'absolute';
-    controlPanel.style.left = '15px';
-    controlPanel.style.top = '15px';
-    controlPanel.style.width = '450px';
-    controlPanel.style.maxHeight = ( layoutHeight - 30 ) + 'px';
-    controlPanel.style.background = '#f7f5f4';
-    controlPanel.style.padding = '10px';
-    controlPanel.style.border = '2px solid #ccc';
-    controlPanel.style.borderRadius = '8px';
-    controlPanel.style.boxSizing = 'border-box';
-    controlPanel.style.pointerEvents = 'auto';
-    controlPanel.style.display = 'flex';
-    controlPanel.style.flexDirection = 'column';
-    controlPanel.style.gap = '10px';
-    controlPanel.style.overflow = 'auto';
-    controlPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-
-    // Control panel title
-    const controlTitle = document.createElement( 'div' );
-    controlTitle.textContent = 'Loan Calculator';
-    controlTitle.style.fontSize = '16px';
-    controlTitle.style.fontWeight = 'bold';
-    controlTitle.style.marginBottom = '5px';
-    controlTitle.style.textAlign = 'center';
-    controlTitle.style.color = '#333';
-    controlTitle.style.borderBottom = '2px solid #0c2049';
-    controlTitle.style.paddingBottom = '8px';
-
-    // Build form
-    const form = document.createElement( 'form' );
-    form.style.display = 'flex';
-    form.style.flexDirection = 'column';
-    form.style.gap = '8px';
-
-    const makeField = ( labelText: string, inputValue: string ): { wrap: HTMLDivElement; input: HTMLInputElement } => {
-      const wrap = document.createElement( 'div' );
-      wrap.style.display = 'flex';
-      wrap.style.flexDirection = 'column';
-      const label = document.createElement( 'label' );
-      label.textContent = labelText;
-      label.style.fontSize = '16px';
-      label.style.marginBottom = '2px';
-      const input = document.createElement( 'input' );
-      input.type = 'number';
-      input.value = inputValue;
-      input.style.padding = '6px 8px';
-      input.style.boxSizing = 'border-box';
-      input.style.fontSize = '16px';
-      input.addEventListener( 'keydown', stop );
-      wrap.appendChild( label );
-      wrap.appendChild( input );
-      return { wrap, input };
-    };
-
-    const amountField = makeField( 'Loan amount', model.loanAmountProperty.value.toString() );
-    const termField = makeField( 'Term (years)', model.termYearsProperty.value.toString() );
-    const rateField = makeField( 'Interest rate (annual %)', model.interestRateProperty.value.toString() );
-
-    form.appendChild( amountField.wrap );
-    form.appendChild( termField.wrap );
-    form.appendChild( rateField.wrap );
-
-    const calculateButton = document.createElement( 'button' );
-    calculateButton.type = 'button';
-    calculateButton.textContent = 'Amortize!';
-    calculateButton.style.padding = '10px 16px';
-    calculateButton.style.fontSize = '16px';
-    calculateButton.style.fontWeight = 'bold';
-    calculateButton.style.backgroundColor = '#0c2049';
-    calculateButton.style.color = 'white';
-    calculateButton.style.border = 'none';
-    calculateButton.style.borderRadius = '4px';
-    calculateButton.style.cursor = 'pointer';
-    calculateButton.addEventListener( 'click', stop );
-    calculateButton.addEventListener( 'mouseenter', () => {
-      calculateButton.style.backgroundColor = '#081632';
+    const termYearsRadioButtonGroup = new AquaRadioButtonGroup( model.termYearsProperty, [
+      { value: 15, createNode: () => new Text( '15 years', { font: LABEL_FONT } ), tandemName: 'fifteenYearsRadioButton' },
+      { value: 30, createNode: () => new Text( '30 years', { font: LABEL_FONT } ), tandemName: 'thirtyYearsRadioButton' }
+    ], {
+      spacing: 8,
+      radioButtonOptions: {
+        radius: 8
+      },
+      tandem: options.tandem.createTandem( 'termYearsRadioButtonGroup' )
     } );
-    calculateButton.addEventListener( 'mouseleave', () => {
-      calculateButton.style.backgroundColor = '#0c2049';
+    
+    const termYearsControl = new VBox( {
+      children: [ termYearsLabel, termYearsRadioButtonGroup ],
+      spacing: 5,
+      align: 'left'
     } );
-    form.appendChild( calculateButton );
 
-    // Results display
-    const resultsDiv = document.createElement( 'div' );
-    resultsDiv.style.fontSize = '12px';
-    resultsDiv.style.lineHeight = '1.6';
-    resultsDiv.style.padding = '6px';
-    resultsDiv.style.backgroundColor = '#f5f5f5';
-    resultsDiv.style.borderRadius = '4px';
-
-    // Table container
-    const tableContainer = document.createElement( 'div' );
-    tableContainer.style.width = '100%';
-    tableContainer.style.maxHeight = '300px';
-    tableContainer.style.overflow = 'auto';
-    tableContainer.style.pointerEvents = 'auto';
-    tableContainer.style.userSelect = 'text';
-
-    // Append to control panel
-    controlPanel.appendChild( controlTitle );
-    controlPanel.appendChild( form );
-    controlPanel.appendChild( tableContainer );
-
-    // Create results panel (top right) for monthly payment, total interest, etc.
-    const resultsPanel = document.createElement( 'div' );
-    resultsPanel.style.position = 'absolute';
-    resultsPanel.style.left = '480px';
-    resultsPanel.style.top = '15px';
-    resultsPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
-    resultsPanel.style.background = '#f7f5f4';
-    resultsPanel.style.padding = '15px';
-    resultsPanel.style.border = '2px solid #ccc';
-    resultsPanel.style.borderRadius = '8px';
-    resultsPanel.style.boxSizing = 'border-box';
-    resultsPanel.style.pointerEvents = 'auto';
-    resultsPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-
-    const resultsTitle = document.createElement( 'div' );
-    resultsTitle.textContent = 'Payment Summary';
-    resultsTitle.style.fontSize = '16px';
-    resultsTitle.style.fontWeight = 'bold';
-    resultsTitle.style.marginBottom = '0px';
-    resultsTitle.style.textAlign = 'center';
-    resultsTitle.style.color = '#333';
-    resultsTitle.style.borderBottom = '2px solid #0c2049';
-    resultsTitle.style.paddingBottom = '8px';
-
-    resultsDiv.style.fontSize = '16px';
-    resultsDiv.style.lineHeight = '1.6';
-    resultsDiv.style.padding = '10px';
-    resultsDiv.style.backgroundColor = 'transparent';
-    resultsDiv.style.borderRadius = '0';
-
-    resultsPanel.appendChild( resultsTitle );
-    resultsPanel.appendChild( resultsDiv );
-
-    // Create chart panel (right side, below results)
-    const chartPanel = document.createElement( 'div' );
-    chartPanel.style.position = 'absolute';
-    chartPanel.style.left = '480px';
-    chartPanel.style.top = '150px';
-    chartPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
-    chartPanel.style.height = '400px';
-    chartPanel.style.background = '#f7f5f4';
-    chartPanel.style.padding = '15px';
-    chartPanel.style.border = '2px solid #ccc';
-    chartPanel.style.borderRadius = '8px';
-    chartPanel.style.boxSizing = 'border-box';
-    chartPanel.style.pointerEvents = 'auto';
-    chartPanel.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-
-    // Chart title
-    const chartTitle = document.createElement( 'div' );
-    chartTitle.textContent = 'Payment Breakdown by Year';
-    chartTitle.style.fontSize = '16px';
-    chartTitle.style.fontWeight = 'bold';
-    chartTitle.style.marginBottom = '10px';
-    chartTitle.style.textAlign = 'center';
-    chartTitle.style.color = '#333';
-    chartTitle.style.borderBottom = '2px solid #0c2049';
-    chartTitle.style.paddingBottom = '8px';
-
-    // Chart canvas container
-    const chartCanvasContainer = document.createElement( 'div' );
-    chartCanvasContainer.style.width = '100%';
-    chartCanvasContainer.style.height = 'calc(100% - 35px)';
-    chartCanvasContainer.style.position = 'relative';
-
-    const chartCanvas = document.createElement( 'canvas' );
-    chartCanvas.style.width = '100%';
-    chartCanvas.style.height = '100%';
-    chartCanvasContainer.appendChild( chartCanvas );
-
-    chartPanel.appendChild( chartTitle );
-    chartPanel.appendChild( chartCanvasContainer );
-
-    uiWrapper.appendChild( controlPanel );
-    uiWrapper.appendChild( resultsPanel );
-    uiWrapper.appendChild( chartPanel );
-
-    const uiNode = new DOM( uiWrapper, { 
-      left: 0, 
-      top: 0, 
-      tandem: options.tandem.createTandem( 'amortizationUI' ) 
+    // Create NumberControl for Interest Rate
+    const interestRateControl = new NumberControl( 'Interest Rate (%):', model.interestRateProperty, new Range( 0, 12 ), {
+      delta: 0.1,
+      numberDisplayOptions: {
+        decimalPlaces: 2,
+        align: 'right',
+        xMargin: 10,
+        yMargin: 5,
+        textOptions: {
+          font: LABEL_FONT
+        }
+      },
+      sliderOptions: {
+        majorTickLength: 10,
+        trackSize: new Dimension2( 180, 3 )
+      },
+      titleNodeOptions: {
+        font: LABEL_FONT,
+        maxWidth: 200
+      },
+      layoutFunction: NumberControl.createLayoutFunction4(),
+      tandem: options.tandem.createTandem( 'interestRateControl' )
     } );
-    this.addChild( uiNode );
 
-    // Responsive layout
-    const onResize = (): void => {
-      const vw = window.innerWidth;
+    // Calculate Button
+    const calculateButtonText = new Text( 'Amortize!', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: 'white'
+    } );
+    
+    this.calculateButton = new RectangularPushButton( {
+      content: calculateButtonText,
+      baseColor: ACCENT_COLOR,
+      listener: () => {
+        model.computeSchedule();
+        // Unlock extra payment panel after first calculation
+        this.extraPaymentPanel.visible = true;
+      },
+      xMargin: 20,
+      yMargin: 10,
+      tandem: options.tandem.createTandem( 'calculateButton' )
+    } );
+
+    // Results summary text for monthly payment only
+    this.resultsText = new Text( '', {
+      font: RESULTS_FONT,
+      fill: 'black',
+      tandem: options.tandem.createTandem( 'resultsText' )
+    } );
+
+    // Comparison text showing impact of extra payments
+    this.comparisonText = new Text( '', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: new Color( '#0a8a0a' ),
+      maxWidth: CONTROL_PANEL_WIDTH - 40,
+      tandem: options.tandem.createTandem( 'comparisonText' )
+    } );
+
+    // Control Panel Content (vertical stack)
+    const controlPanelContent = new VBox( {
+      children: [
+        controlTitleText,
+        loanAmountControl,
+        termYearsControl,
+        interestRateControl,
+        this.calculateButton,
+        this.resultsText
+      ],
+      spacing: 15,
+      align: 'left'
+    } );
+
+    // Wrap control panel in Panel component
+    const controlPanel = new Panel( controlPanelContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#ccc' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 20,
+      yMargin: 15,
+      tandem: options.tandem.createTandem( 'controlPanel' )
+    } );
+
+    // Position control panel at top left
+    controlPanel.left = AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN + 20;
+    controlPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN;
+    this.addChild( controlPanel );
+
+    // Create Extra Payment Panel (initially hidden/locked)
+    const extraPaymentTitleText = new Text( 'What happens when you extra?', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: new Color( '#0a8a0a' )
+    } );
+
+    // Create NumberControl for Extra Monthly Payment
+    this.extraPaymentControl = new NumberControl( 'Extra Monthly Payment ($):', model.extraMonthlyPaymentProperty, new Range( 0, 1000 ), {
+      delta: 25,
+      numberDisplayOptions: {
+        decimalPlaces: 0,
+        align: 'right',
+        xMargin: 10,
+        yMargin: 5,
+        useRichText: false,
+        textOptions: {
+          font: LABEL_FONT
+        }
+      },
+      sliderOptions: {
+        majorTickLength: 10,
+        trackSize: new Dimension2( 180, 3 )
+      },
+      titleNodeOptions: {
+        font: LABEL_FONT,
+        maxWidth: 200
+      },
+      layoutFunction: NumberControl.createLayoutFunction4(),
+      tandem: options.tandem.createTandem( 'extraPaymentControl' )
+    } );
+
+    // Re-amortize Button
+    const reAmortizeButtonText = new Text( 'Re-amortize!', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: 'white'
+    } );
+    
+    const reAmortizeButton = new RectangularPushButton( {
+      content: reAmortizeButtonText,
+      baseColor: new Color( '#0a8a0a' ),
+      listener: () => {
+        model.computeSchedule();
+      },
+      xMargin: 20,
+      yMargin: 10,
+      tandem: options.tandem.createTandem( 'reAmortizeButton' )
+    } );
+
+    const extraPanelContent = new VBox( {
+      children: [
+        extraPaymentTitleText,
+        this.extraPaymentControl,
+        reAmortizeButton,
+        this.comparisonText
+      ],
+      spacing: 12,
+      align: 'left'
+    } );
+
+    this.extraPaymentPanel = new Panel( extraPanelContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#0a8a0a' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 20,
+      yMargin: 15,
+      visible: false, // Initially hidden until first calculation
+      tandem: options.tandem.createTandem( 'extraPaymentPanel' )
+    } );
+
+    // Position extra payment panel below control panel
+    this.extraPaymentPanel.left = controlPanel.left;
+    this.extraPaymentPanel.top = controlPanel.bottom ;
+    this.addChild( this.extraPaymentPanel );
+
+    // Combined Graph Panel
+    this.graphTitleText = new Text( 'Payment Breakdown', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: ACCENT_COLOR,
+      tandem: options.tandem.createTandem( 'graphTitleText' )
+    } );
+
+    // Info box for graph (will be updated with metrics)
+    this.graphInfoBox = new VBox( {
+      children: [ this.graphTitleText ],
+      spacing: 5,
+      align: 'center'
+    } );
+
+    this.combinedGraphContainer = new Node();
+    const combinedGraphBackground = new Rectangle( 0, 0, 600, 450, {
+      fill: 'white',
+      stroke: '#ddd',
+      lineWidth: 1
+    } );
+    this.combinedGraphContainer.addChild( combinedGraphBackground );
+
+    const combinedGraphContent = new VBox( {
+      children: [ this.graphInfoBox, this.combinedGraphContainer ],
+      spacing: 8,
+      align: 'center'
+    } );
+
+    // Wrap combined graph in Panel component
+    const combinedGraphPanel = new Panel( combinedGraphContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#ccc' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 15,
+      yMargin: 15,
+      tandem: options.tandem.createTandem( 'combinedGraphPanel' )
+    } );
+
+    // Position combined graph on right side
+    combinedGraphPanel.right = this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN - 20;
+    combinedGraphPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN;
+    this.addChild( combinedGraphPanel );
+
+    // Initialize chart transform and node for bamboo charts
+    const graphWidth = 600;
+    const graphHeight = 450;
+    const modelViewTransformRange = new Range( 0, 360 ); // months
+    const modelViewTransformDomain = new Range( 0, 5000 ); // dollars (will be updated dynamically)
+    
+    this.chartTransform = new ChartTransform( {
+      viewWidth: graphWidth,
+      viewHeight: graphHeight,
+      modelXRange: modelViewTransformRange,
+      modelYRange: modelViewTransformDomain
+    } );
+
+    this.chartNode = new Node();
+
+    // Helper function to render combined graph with bamboo charts
+    const renderCombinedGraph = ( container: Node, standardSchedule: any[], extraSchedule: any[], graphWidth: number, graphHeight: number ): void => {
+      // Clear existing plots
+      container.removeAllChildren();
+      if ( this.chartCanvasNode ) {
+        this.chartCanvasNode.dispose();
+        this.chartCanvasNode = null;
+      }
+      if ( this.standardInterestPlot ) this.standardInterestPlot.dispose();
+      if ( this.standardPrincipalPlot ) this.standardPrincipalPlot.dispose();
+      if ( this.extraInterestPlot ) this.extraInterestPlot.dispose();
+      if ( this.extraPrincipalPlot ) this.extraPrincipalPlot.dispose();
+      this.standardInterestPlot = null;
+      this.standardPrincipalPlot = null;
+      this.extraInterestPlot = null;
+      this.extraPrincipalPlot = null;
       
-      // Adjust layout for small screens
-      if ( vw < 800 ) {
-        // Stack panels vertically on small screens
-        controlPanel.style.position = 'relative';
-        controlPanel.style.left = '0';
-        controlPanel.style.width = '100%';
-        controlPanel.style.maxHeight = 'none';
-        
-        resultsPanel.style.position = 'relative';
-        resultsPanel.style.left = '0';
-        resultsPanel.style.width = '100%';
-        resultsPanel.style.marginTop = '15px';
-        
-        chartPanel.style.position = 'relative';
-        chartPanel.style.left = '0';
-        chartPanel.style.right = '0';
-        chartPanel.style.width = '100%';
-        chartPanel.style.marginTop = '15px';
-        
-        uiWrapper.style.padding = '15px';
+      // If recalculating without extra payments, reset the flag so animation plays
+      if ( extraSchedule.length === 0 ) {
+        this.standardLinesDrawn = false;
       }
-      else {
-        // Side-by-side layout for larger screens
-        controlPanel.style.position = 'absolute';
-        controlPanel.style.left = '15px';
-        controlPanel.style.width = '450px';
-        controlPanel.style.maxHeight = 'calc(100% - 30px)';
-        
-        resultsPanel.style.position = 'absolute';
-        resultsPanel.style.left = '480px';
-        resultsPanel.style.top = '15px';
-        resultsPanel.style.width = ( layoutWidth - 480 - 15 ) + 'px';
-        
-        chartPanel.style.position = 'absolute';
-        chartPanel.style.left = '480px';
-        chartPanel.style.top = '150px';
-        chartPanel.style.right = '15px';
-        chartPanel.style.marginTop = '0';
-        
-        uiWrapper.style.padding = '0';
-      }
-    };
-    window.addEventListener( 'resize', onResize );
-    onResize();
 
-    // Track Chart.js instance
-    let chartInstance: any = null;
+      if ( standardSchedule.length === 0 ) return;
+
+      // Determine max values for dynamic scaling
+      const termYears = model.termYearsProperty.value;
+      const termMonths = termYears * 12;
+      
+      // Find max payment amount across all schedules for y-axis scaling
+      let maxPayment = 100;
+      [ standardSchedule, extraSchedule ].forEach( schedule => {
+        schedule.forEach( entry => {
+          maxPayment = Math.max( maxPayment, entry.principal || 0, entry.interest || 0 );
+        } );
+      } );
+
+      // Update chart transform with current data ranges
+      this.chartTransform.setModelXRange( new Range( 0, termMonths ) );
+      this.chartTransform.setModelYRange( new Range( 0, maxPayment * 1.1 ) ); // 10% padding
+
+      // Clear and rebuild chart
+      this.chartNode.removeAllChildren();
+
+      // Add chart rectangle (boundary)
+      const chartRectangle = new ChartRectangle( this.chartTransform, {
+        fill: 'white',
+        stroke: new Color( 220, 220, 220 ),
+        lineWidth: 1
+      } );
+      this.chartNode.addChild( chartRectangle );
+
+      // Add grid lines
+      const gridLineSet = new GridLineSet( this.chartTransform, Orientation.HORIZONTAL, 1000, {
+        stroke: new Color( 230, 230, 230 ),
+        lineWidth: 0.5
+      } );
+      this.chartNode.addChild( gridLineSet );
+
+      // Add axes
+      const xAxisLine = new AxisLine( this.chartTransform, Orientation.HORIZONTAL, {
+        stroke: new Color( 51, 51, 51 ),
+        lineWidth: 2
+      } );
+      const yAxisLine = new AxisLine( this.chartTransform, Orientation.VERTICAL, {
+        stroke: new Color( 51, 51, 51 ),
+        lineWidth: 2
+      } );
+      this.chartNode.addChild( xAxisLine );
+      this.chartNode.addChild( yAxisLine );
+
+      // Helper to convert schedule to Vector2 data points
+      const scheduleToDataPoints = ( schedule: any[], field: 'principal' | 'interest' ): Vector2[] => {
+        return schedule.map( ( entry, index ) => new Vector2( index, entry[ field ] || 0 ) );
+      };
+
+      // Store full datasets for animation
+      this.fullStandardInterestData = scheduleToDataPoints( standardSchedule, 'interest' );
+      this.fullStandardPrincipalData = scheduleToDataPoints( standardSchedule, 'principal' );
+
+      // If adding extra payment and standard lines already drawn, show them instantly with lighter colors
+      const standardInitialData = ( extraSchedule.length > 0 && this.standardLinesDrawn ) 
+        ? this.fullStandardInterestData 
+        : [];
+      const principalInitialData = ( extraSchedule.length > 0 && this.standardLinesDrawn )
+        ? this.fullStandardPrincipalData
+        : [];
+
+      // Use lighter colors when showing standard alongside extra payments
+      const standardInterestColor = extraSchedule.length > 0 
+        ? new Color( 232, 116, 59, 0.4 ) // Lighter orange with alpha
+        : new Color( 232, 116, 59 ); // Full orange
+      const standardPrincipalColor = extraSchedule.length > 0 
+        ? new Color( 25, 169, 121, 0.4 ) // Lighter green with alpha
+        : new Color( 25, 169, 121 ); // Full green
+
+      this.standardInterestPlot = new CanvasLinePlot( this.chartTransform, standardInitialData, {
+        stroke: standardInterestColor,
+        lineWidth: 2,
+        lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
+      } );
+
+      this.standardPrincipalPlot = new CanvasLinePlot( this.chartTransform, principalInitialData, {
+        stroke: standardPrincipalColor,
+        lineWidth: 2,
+        lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
+      } );
+
+      // Collect all painters for ChartCanvasNode
+      const painters = [ this.standardInterestPlot, this.standardPrincipalPlot ];
+
+      // If extra schedule exists, prepare those lines too (use truncated data from model)
+      if ( extraSchedule.length > 0 ) {
+        // Get datasets - already truncated by model to exclude partial payments
+        this.fullExtraInterestData = scheduleToDataPoints( extraSchedule, 'interest' );
+        this.fullExtraPrincipalData = scheduleToDataPoints( extraSchedule, 'principal' );
+
+        this.extraInterestPlot = new CanvasLinePlot( this.chartTransform, [], {
+          stroke: new Color( 232, 116, 59 ), // #e8743b
+          lineWidth: 3
+        } );
+        painters.push( this.extraInterestPlot );
+
+        this.extraPrincipalPlot = new CanvasLinePlot( this.chartTransform, [], {
+          stroke: new Color( 25, 169, 121 ), // #19a979
+          lineWidth: 3
+        } );
+        painters.push( this.extraPrincipalPlot );
+      } else {
+        this.fullExtraInterestData = [];
+        this.fullExtraPrincipalData = [];
+      }
+
+      // Create ChartCanvasNode to render all the plots
+      this.chartCanvasNode = new ChartCanvasNode( this.chartTransform, painters );
+      this.chartNode.addChild( this.chartCanvasNode );
+
+      // Start animation from beginning
+      this.animationProgress.value = 0;
+      this.isAnimating = true;
+
+      // Add year labels on x-axis
+      for ( let year = 1; year <= termYears; year++ ) {
+        if ( year === 1 || year === termYears || year % 5 === 0 ) {
+          const monthNumber = year * 12;
+          const viewPoint = this.chartTransform.modelToViewXY( monthNumber, 0 );
+          const yearLabel = new Text( `Year ${year}`, {
+            font: new PhetFont( 10 ),
+            fill: '#333',
+            centerX: viewPoint.x,
+            top: viewPoint.y + 8
+          } );
+          this.chartNode.addChild( yearLabel );
+        }
+      }
+
+      // Add y-axis label
+      const yLabel = new Text( 'Monthly Payment ($)', {
+        font: new PhetFont( { size: 11, weight: 'bold' } ),
+        fill: '#333',
+        rotation: -Math.PI / 2,
+        right: this.chartTransform.modelToViewXY( 0, 0 ).x - 15,
+        centerY: graphHeight / 2
+      } );
+      this.chartNode.addChild( yLabel );
+
+      // Add legend
+      const legendText = new Text( 'Green: Principal | Orange: Interest', {
+        font: new PhetFont( 11 ),
+        fill: '#666',
+        centerX: graphWidth / 2,
+        top: 10
+      } );
+      this.chartNode.addChild( legendText );
+
+      if ( extraSchedule.length > 0 ) {
+        const dashedLegendText = new Text( 'Dashed/Light: Standard | Solid/Dark: With Extra Payments', {
+          font: new PhetFont( 10 ),
+          fill: '#666',
+          centerX: graphWidth / 2,
+          top: 28
+        } );
+        this.chartNode.addChild( dashedLegendText );
+      }
+
+      // Add the chart node to the container
+      container.addChild( this.chartNode );
+      
+      // Add hover indicators for interactivity
+      this.addHoverIndicators( container, standardSchedule, extraSchedule );
+    };
 
     // View update function - observes model and updates UI
     const updateView = (): void => {
       const monthlyPayment = model.monthlyPaymentProperty.value;
       const totalInterest = model.totalInterestProperty.value;
       const totalPaid = model.totalPaidProperty.value;
-      const schedule = model.scheduleArray.slice();
+      const schedule = model.scheduleArray.slice(); // Full schedule for totals
+      const scheduleTruncated = model.scheduleArrayTruncated.slice(); // Truncated for graphing
+      const extraPayment = model.extraMonthlyPaymentProperty.value;
 
       if ( model.loanAmountProperty.value <= 0 || model.termYearsProperty.value <= 0 ) {
-        resultsDiv.innerHTML = '<em>Please enter a positive loan amount and term.</em>';
-        tableContainer.innerHTML = '';
+        this.resultsText.string = 'Please enter positive values';
+        this.comparisonText.string = '';
         return;
       }
 
-      // Update results display
-      resultsDiv.innerHTML = `Total interest: <strong>$${formatNumber( totalInterest )}</strong><br/>Total paid: <strong>$${formatNumber( totalPaid )}</strong>`;
+      // Update results text to show only monthly payment
+      this.resultsText.string = `Monthly Payment: $${formatNumber( monthlyPayment )}`;
 
-      // Update table
-      tableContainer.innerHTML = '';
-      renderAmortizationTable( tableContainer, schedule );
-
-      // Update chart
-      try {
-        const Chart = ( window as any ).Chart;
-        if ( Chart && schedule.length > 0 ) {
-          const ctx = ( chartCanvas as HTMLCanvasElement ).getContext( '2d' );
-          const yearly = aggregateByYear( schedule );
-          const labels = yearly.map( y => `Year ${y.year}` );
-          const principalAmounts = yearly.map( y => y.principalPaid );
-          const interestAmounts = yearly.map( y => y.interestPaid );
-          const totalAmounts = principalAmounts.map( ( p, i ) => p + interestAmounts[ i ] );
-          const principalPercent = principalAmounts.map( ( p, i ) => totalAmounts[ i ] ? ( p / totalAmounts[ i ] ) * 100 : 0 );
-          const interestPercent = interestAmounts.map( ( v, i ) => totalAmounts[ i ] ? ( v / totalAmounts[ i ] ) * 100 : 0 );
-
-          const datasets = [
-            { label: 'Principal', data: principalPercent, backgroundColor: '#14bf96', stack: 'combined' },
-            { label: 'Interest', data: interestPercent, backgroundColor: '#ff751f', stack: 'combined' }
-          ];
-
-          const config = {
-            type: 'bar',
-            data: { labels: labels, datasets: datasets },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { position: 'top' },
-                tooltip: {
-                  callbacks: {
-                    label: function( context: any ): string {
-                      const dsLabel = context.dataset.label || '';
-                      const idx = context.dataIndex;
-                      const pct = context.dataset.data[ idx ];
-                      const amount = dsLabel === 'Principal' ? principalAmounts[ idx ] : interestAmounts[ idx ];
-                      return `${dsLabel}: ${pct.toFixed( 1 )}% ($${formatNumber( amount )})`;
-                    }
-                  }
-                }
-              },
-              scales: {
-                x: { stacked: true },
-                y: { stacked: true, beginAtZero: true, max: 100, ticks: { callback: ( v: any ) => `${v}%` } }
-              }
-            }
-          };
-
-          if ( chartInstance ) {
-            chartInstance.data.labels = labels;
-            chartInstance.data.datasets = datasets;
-            chartInstance.update();
-          }
-          else {
-            chartInstance = new Chart( ctx, config );
-          }
-        }
+      // Update info box with metrics
+      this.graphInfoBox.removeAllChildren();
+      this.graphInfoBox.addChild( this.graphTitleText );
+      
+      // Standard scenario metrics
+      const standardMonthsText = new Text( `Standard: ${schedule.length} months`, {
+        font: new PhetFont( 11 ),
+        fill: '#666'
+      } );
+      const standardTotalText = new Text( `Total: $${formatNumber( totalPaid )}`, {
+        font: new PhetFont( { size: 11, weight: 'bold' } ),
+        fill: '#333'
+      } );
+      const standardInterestText = new Text( `Interest: $${formatNumber( totalInterest )}`, {
+        font: new PhetFont( 11 ),
+        fill: '#e8743b'
+      } );
+      
+      const standardMetrics = new HBox( {
+        children: [ standardMonthsText, standardTotalText, standardInterestText ],
+        spacing: 15
+      } );
+      this.graphInfoBox.addChild( standardMetrics );
+      
+      // Extra scenario metrics - always show placeholder to prevent graph shifting
+      const scheduleWithExtra = model.scheduleWithExtraArray.slice(); // Full for totals
+      const scheduleWithExtraTruncated = model.scheduleWithExtraArrayTruncated.slice(); // Truncated for graphing
+      
+      let extraMonthsText: Text;
+      let extraTotalText: Text;
+      let extraInterestText: Text;
+      
+      if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
+        // Show actual extra payment metrics
+        const totalPaidWithExtra = model.totalPaidWithExtraProperty.value;
+        const totalInterestWithExtra = model.totalInterestWithExtraProperty.value;
+        
+        extraMonthsText = new Text( `With Extra: ${scheduleWithExtra.length} months`, {
+          font: new PhetFont( 11 ),
+          fill: '#666'
+        } );
+        extraTotalText = new Text( `Total: $${formatNumber( totalPaidWithExtra )}`, {
+          font: new PhetFont( { size: 11, weight: 'bold' } ),
+          fill: '#333'
+        } );
+        extraInterestText = new Text( `Interest: $${formatNumber( totalInterestWithExtra )}`, {
+          font: new PhetFont( 11 ),
+          fill: '#19a979'
+        } );
+      } else {
+        // Show empty placeholder to maintain spacing
+        extraMonthsText = new Text( ' ', {
+          font: new PhetFont( 11 ),
+          fill: '#666'
+        } );
+        extraTotalText = new Text( ' ', {
+          font: new PhetFont( { size: 11, weight: 'bold' } ),
+          fill: '#333'
+        } );
+        extraInterestText = new Text( ' ', {
+          font: new PhetFont( 11 ),
+          fill: '#19a979'
+        } );
       }
-      catch ( chartErr ) {
-        console.warn( 'Failed to render chart', chartErr );
+      
+      const extraMetrics = new HBox( {
+        children: [ extraMonthsText, extraTotalText, extraInterestText ],
+        spacing: 15
+      } );
+      this.graphInfoBox.addChild( extraMetrics );
+
+      // Update comparison text if extra payments are being made
+      if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
+        const monthsSaved = model.monthsSavedProperty.value;
+        const interestSaved = model.interestSavedProperty.value;
+        const yearsSaved = ( monthsSaved / 12 ).toFixed( 1 );
       }
+
+      // Render combined graph with both scenarios (use truncated schedules)
+      renderCombinedGraph( this.combinedGraphContainer, scheduleTruncated, scheduleWithExtraTruncated, 600, 450 );
     };
 
-    // Handle calculate button click - update model properties (controller logic)
-    const onCalculate = (): void => {
-      const loanAmount = parseFloat( amountField.input.value ) || 0;
-      const termYears = parseFloat( termField.input.value ) || 0;
-      const interestRate = parseFloat( rateField.input.value ) || 0;
-      model.loanAmountProperty.value = loanAmount;
-      model.termYearsProperty.value = termYears;
-      model.interestRateProperty.value = interestRate;
-      model.computeSchedule();
-      updateView();
-    };
+    // Listen to model changes - watch properties that are set AFTER computation completes
+    const scheduleListener = () => updateView();
+    // Listen to properties that indicate computation is complete
+    model.monthlyPaymentProperty.link( scheduleListener );
+    model.totalInterestProperty.link( scheduleListener );
+    model.totalPaidProperty.link( scheduleListener );
+    // Also listen to extra payment properties for Re-amortize updates
+    model.totalInterestWithExtraProperty.link( scheduleListener );
+    model.totalPaidWithExtraProperty.link( scheduleListener );
 
-    calculateButton.addEventListener( 'click', onCalculate );
-    form.addEventListener( 'submit', ( e: Event ) => {
-      e.preventDefault();
-      onCalculate();
-    } );
-
-    // Initial render
-    updateView();
+    // Don't render initially - wait for user to click Amortize
 
     // Reset button
     const resetAllButton = new ResetAllButton( {
       listener: () => {
-        model.reset();
-        amountField.input.value = model.loanAmountProperty.value.toString();
-        termField.input.value = model.termYearsProperty.value.toString();
-        rateField.input.value = model.interestRateProperty.value.toString();
+        // Dispose chart components properly BEFORE resetting model
+        if ( this.chartCanvasNode ) {
+          this.chartCanvasNode.dispose();
+          this.chartCanvasNode = null;
+        }
+        if ( this.standardInterestPlot ) {
+          this.standardInterestPlot.dispose();
+          this.standardInterestPlot = null;
+        }
+        if ( this.standardPrincipalPlot ) {
+          this.standardPrincipalPlot.dispose();
+          this.standardPrincipalPlot = null;
+        }
+        if ( this.extraInterestPlot ) {
+          this.extraInterestPlot.dispose();
+          this.extraInterestPlot = null;
+        }
+        if ( this.extraPrincipalPlot ) {
+          this.extraPrincipalPlot.dispose();
+          this.extraPrincipalPlot = null;
+        }
+        if ( this.cursorLine ) {
+          this.cursorLine.dispose();
+          this.cursorLine = null;
+        }
+        if ( this.principalCircle ) {
+          this.principalCircle.dispose();
+          this.principalCircle = null;
+        }
+        if ( this.interestCircle ) {
+          this.interestCircle.dispose();
+          this.interestCircle = null;
+        }
+        if ( this.principalTooltip ) {
+          this.principalTooltip.dispose();
+          this.principalTooltip = null;
+        }
+        if ( this.interestTooltip ) {
+          this.interestTooltip.dispose();
+          this.interestTooltip = null;
+        }
+        if ( this.chartHitArea ) {
+          this.chartHitArea.dispose();
+          this.chartHitArea = null;
+        }
+        if ( this.monthLabel ) {
+          this.monthLabel.dispose();
+          this.monthLabel = null;
+        }
+        
+        // Reset animation state
+        this.standardLinesDrawn = false;
+        this.isAnimating = false;
+        this.animationProgress.value = 0;
+        
+        // Clear the graph
+        this.combinedGraphContainer.removeAllChildren();
+        this.combinedGraphContainer.addChild( new Rectangle( 0, 0, 600, 450, {
+          fill: 'white',
+          stroke: '#ddd',
+          lineWidth: 1
+        } ) );
+        this.resultsText.string = '';
+        this.comparisonText.string = '';
+        this.graphInfoBox.removeAllChildren();
+        this.graphInfoBox.addChild( this.graphTitleText );
+        this.extraPaymentPanel.visible = false;
+        
+        // Reset model properties without computing schedule
+        model.loanAmountProperty.reset();
+        model.termYearsProperty.reset();
+        model.interestRateProperty.reset();
+        model.extraMonthlyPaymentProperty.reset();
+        
+        // Clear model schedules and properties manually
+        model.scheduleArray.clear();
+        model.scheduleArrayTruncated.clear();
+        model.scheduleWithExtraArray.clear();
+        model.scheduleWithExtraArrayTruncated.clear();
+        model.monthlyPaymentProperty.value = 0;
+        model.totalInterestProperty.value = 0;
+        model.totalPaidProperty.value = 0;
+        model.totalInterestWithExtraProperty.value = 0;
+        model.totalPaidWithExtraProperty.value = 0;
+        model.monthsSavedProperty.value = 0;
+        model.interestSavedProperty.value = 0;
       },
       right: this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN,
       bottom: this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN,
@@ -430,11 +772,250 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Disposal
     this.disposeAmortizationCalcScreenView = () => {
-      window.removeEventListener( 'resize', onResize );
-      calculateButton.removeEventListener( 'click', onCalculate );
-      uiNode.dispose();
+      // Unlink property listeners
+      model.monthlyPaymentProperty.unlink( scheduleListener );
+      model.totalInterestProperty.unlink( scheduleListener );
+      model.totalPaidProperty.unlink( scheduleListener );
+      model.totalInterestWithExtraProperty.unlink( scheduleListener );
+      model.totalPaidWithExtraProperty.unlink( scheduleListener );
+      // Dispose hover components
+      if ( this.cursorLine ) {
+        this.cursorLine.dispose();
+      }
+      if ( this.principalCircle ) {
+        this.principalCircle.dispose();
+      }
+      if ( this.interestCircle ) {
+        this.interestCircle.dispose();
+      }
+      if ( this.principalTooltip ) {
+        this.principalTooltip.dispose();
+      }
+      if ( this.interestTooltip ) {
+        this.interestTooltip.dispose();
+      }
+      if ( this.chartHitArea ) {
+        this.chartHitArea.dispose();
+      }
+      if ( this.monthLabel ) {
+        this.monthLabel.dispose();
+      }
+      controlPanel.dispose();
+      this.extraPaymentPanel.dispose();
+      combinedGraphPanel.dispose();
       resetAllButton.dispose();
+      loanAmountControl.dispose();
+      termYearsRadioButtonGroup.dispose();
+      interestRateControl.dispose();
+      this.calculateButton.dispose();
+      this.extraPaymentControl.dispose();
+      reAmortizeButton.dispose();
     };
+  }
+
+  /**
+   * Adds interactive vertical line cursor with circles showing values at intersection points.
+   */
+  private addHoverIndicators( container: Node, standardSchedule: any[], extraSchedule: any[] ): void {
+    // Remove existing hover components
+    if ( this.cursorLine ) {
+      this.cursorLine.dispose();
+      this.cursorLine = null;
+    }
+    if ( this.principalCircle ) {
+      this.principalCircle.dispose();
+      this.principalCircle = null;
+    }
+    if ( this.interestCircle ) {
+      this.interestCircle.dispose();
+      this.interestCircle = null;
+    }
+    if ( this.principalTooltip ) {
+      this.principalTooltip.dispose();
+      this.principalTooltip = null;
+    }
+    if ( this.interestTooltip ) {
+      this.interestTooltip.dispose();
+      this.interestTooltip = null;
+    }
+    if ( this.chartHitArea ) {
+      this.chartHitArea.dispose();
+      this.chartHitArea = null;
+    }
+    if ( this.monthLabel ) {
+      this.monthLabel.dispose();
+      this.monthLabel = null;
+    }
+
+    // Use extra schedule if available, but keep both for tooltips
+    this.activeSchedule = extraSchedule.length > 0 ? extraSchedule : standardSchedule;
+    const showBothSchedules = extraSchedule.length > 0 && standardSchedule.length > 0;
+
+    if ( this.activeSchedule.length === 0 ) return;
+
+    // Get chart bounds - use view dimensions from chartTransform
+    const chartWidth = this.chartTransform.viewWidth;
+    const chartHeight = this.chartTransform.viewHeight;
+
+    // Create vertical cursor line (initially hidden)
+    this.cursorLine = new Line( 0, 0, 0, chartHeight, {
+      stroke: new Color( 100, 100, 100, 0.5 ),
+      lineWidth: 1,
+      visible: false
+    } );
+
+    // Create principal circle (green)
+    this.principalCircle = new Circle( 5, {
+      fill: new Color( 25, 169, 121 ),
+      stroke: 'white',
+      lineWidth: 2,
+      visible: false
+    } );
+
+    // Create interest circle (orange)
+    this.interestCircle = new Circle( 5, {
+      fill: new Color( 232, 116, 59 ),
+      stroke: 'white',
+      lineWidth: 2,
+      visible: false
+    } );
+
+    // Create tooltip for principal
+    const principalTooltipText = new Text( '', {
+      font: new PhetFont( 11 ),
+      fill: 'white'
+    } );
+    this.principalTooltip = new Panel( principalTooltipText, {
+      fill: new Color( 25, 169, 121, 0.9 ),
+      stroke: 'white',
+      lineWidth: 1,
+      cornerRadius: 4,
+      xMargin: 6,
+      yMargin: 4,
+      visible: false
+    } );
+
+    // Create tooltip for interest
+    const interestTooltipText = new Text( '', {
+      font: new PhetFont( 11 ),
+      fill: 'white'
+    } );
+    this.interestTooltip = new Panel( interestTooltipText, {
+      fill: new Color( 232, 116, 59, 0.9 ),
+      stroke: 'white',
+      lineWidth: 1,
+      cornerRadius: 4,
+      xMargin: 6,
+      yMargin: 4,
+      visible: false
+    } );
+
+    // Create month label that follows cursor along x-axis with white background
+    const monthLabelText = new Text( '', {
+      font: new PhetFont( { size: 11, weight: 'bold' } ),
+      fill: new Color( 100, 100, 100 )
+    } );
+    this.monthLabel = new Panel( monthLabelText, {
+      fill: 'white',
+      stroke: new Color( 200, 200, 200 ),
+      lineWidth: 1,
+      cornerRadius: 3,
+      xMargin: 5,
+      yMargin: 3,
+      visible: false
+    } );
+
+    // Create invisible hit area over entire chart
+    this.chartHitArea = new Rectangle( 0, 0, chartWidth, chartHeight, {
+      fill: Color.TRANSPARENT,
+      cursor: 'crosshair'
+    } );
+
+    // Add mouse move listener
+    this.chartHitArea.addInputListener( {
+      move: ( event: any ) => {
+        const localPoint = this.chartHitArea!.globalToLocalPoint( event.pointer.point );
+        
+        // Convert view x to model x (month number)
+        const modelX = this.chartTransform.viewToModelX( localPoint.x );
+        const monthIndex = Math.round( Math.max( 0, Math.min( modelX, this.activeSchedule.length - 1 ) ) );
+        
+        if ( monthIndex >= 0 && monthIndex < this.activeSchedule.length ) {
+          const entry = this.activeSchedule[ monthIndex ];
+          
+          // Also get standard schedule entry if showing both
+          const standardEntry = showBothSchedules && monthIndex < standardSchedule.length 
+            ? standardSchedule[ monthIndex ] 
+            : null;
+          
+          // Get view positions for this month's data
+          const principalPoint = this.chartTransform.modelToViewXY( monthIndex, entry.principal || 0 );
+          const interestPoint = this.chartTransform.modelToViewXY( monthIndex, entry.interest || 0 );
+          
+          // Update cursor line position
+          this.cursorLine!.setLine( localPoint.x, 0, localPoint.x, chartHeight );
+          this.cursorLine!.visible = true;
+          
+          // Update month label
+          monthLabelText.string = `Month ${entry.paymentNumber}`;
+          this.monthLabel!.centerX = localPoint.x;
+          this.monthLabel!.bottom = chartHeight - 5;
+          this.monthLabel!.visible = true;
+          
+          // Update principal circle and tooltip
+          this.principalCircle!.center = new Vector2( principalPoint.x, principalPoint.y );
+          this.principalCircle!.visible = true;
+          
+          // Build tooltip text showing both values if available
+          if ( standardEntry ) {
+            principalTooltipText.string = `Principal: $${formatNumber( entry.principal )} (was $${formatNumber( standardEntry.principal )})`;
+          } else {
+            principalTooltipText.string = `Principal: $${formatNumber( entry.principal )}`;
+          }
+          
+          // Position principal tooltip to the left, but clamp within bounds
+          const principalTooltipX = Math.max( 0, principalPoint.x - this.principalTooltip!.width - 8 );
+          this.principalTooltip!.x = principalTooltipX;
+          this.principalTooltip!.centerY = principalPoint.y;
+          this.principalTooltip!.visible = true;
+          
+          // Update interest circle and tooltip
+          this.interestCircle!.center = new Vector2( interestPoint.x, interestPoint.y );
+          this.interestCircle!.visible = true;
+          
+          // Build tooltip text showing both values if available
+          if ( standardEntry ) {
+            interestTooltipText.string = `Interest: $${formatNumber( entry.interest )} (was $${formatNumber( standardEntry.interest )})`;
+          } else {
+            interestTooltipText.string = `Interest: $${formatNumber( entry.interest )}`;
+          }
+          
+          // Position interest tooltip to the right, but clamp within bounds
+          const interestTooltipX = Math.min( chartWidth - this.interestTooltip!.width, interestPoint.x + 8 );
+          this.interestTooltip!.x = interestTooltipX;
+          this.interestTooltip!.centerY = interestPoint.y;
+          this.interestTooltip!.visible = true;
+        }
+      },
+      exit: () => {
+        // Hide all cursor components when mouse leaves chart
+        if ( this.cursorLine ) this.cursorLine.visible = false;
+        if ( this.principalCircle ) this.principalCircle.visible = false;
+        if ( this.interestCircle ) this.interestCircle.visible = false;
+        if ( this.principalTooltip ) this.principalTooltip.visible = false;
+        if ( this.interestTooltip ) this.interestTooltip.visible = false;
+        if ( this.monthLabel ) this.monthLabel.visible = false;
+      }
+    } );
+
+    // Add all components to container (order matters for z-index)
+    container.addChild( this.chartHitArea );
+    container.addChild( this.cursorLine );
+    container.addChild( this.principalCircle );
+    container.addChild( this.interestCircle );
+    container.addChild( this.principalTooltip );
+    container.addChild( this.interestTooltip );
+    container.addChild( this.monthLabel );
   }
 
   /**
@@ -449,7 +1030,51 @@ export default class AmortizationCalcScreenView extends ScreenView {
    * @param dt - time step, in seconds
    */
   public override step( dt: number ): void {
-    // no-op unless animations are added
+    if ( this.isAnimating && this.chartCanvasNode ) {
+      // Animate over 2 seconds total (optimized for performance)
+      const maxMonths = Math.max(
+        this.fullStandardInterestData.length,
+        this.fullExtraInterestData.length
+      );
+      
+      if ( maxMonths > 0 ) {
+        // Increment progress (complete animation in 2 seconds)
+        const increment = ( dt / 2.0 ) * maxMonths;
+        this.animationProgress.value = Math.min( this.animationProgress.value + increment, maxMonths );
+        
+        const currentMonth = Math.floor( this.animationProgress.value );
+        
+        // Only animate standard plots if they haven't been drawn yet (first time)
+        if ( !this.standardLinesDrawn ) {
+          if ( this.standardInterestPlot && currentMonth > 0 ) {
+            this.standardInterestPlot.setDataSet( this.fullStandardInterestData.slice( 0, currentMonth ) );
+          }
+          if ( this.standardPrincipalPlot && currentMonth > 0 ) {
+            this.standardPrincipalPlot.setDataSet( this.fullStandardPrincipalData.slice( 0, currentMonth ) );
+          }
+        }
+        
+        // Update extra plots if they exist
+        if ( this.extraInterestPlot && this.fullExtraInterestData.length > 0 && currentMonth > 0 ) {
+          this.extraInterestPlot.setDataSet( this.fullExtraInterestData.slice( 0, Math.min( currentMonth, this.fullExtraInterestData.length ) ) );
+        }
+        if ( this.extraPrincipalPlot && this.fullExtraPrincipalData.length > 0 && currentMonth > 0 ) {
+          this.extraPrincipalPlot.setDataSet( this.fullExtraPrincipalData.slice( 0, Math.min( currentMonth, this.fullExtraPrincipalData.length ) ) );
+        }
+        
+        // Trigger canvas redraw
+        this.chartCanvasNode.update();
+        
+        // Stop animating when complete
+        if ( this.animationProgress.value >= maxMonths ) {
+          this.isAnimating = false;
+          // Mark standard lines as fully drawn if we just animated them
+          if ( !this.standardLinesDrawn && this.fullExtraInterestData.length === 0 ) {
+            this.standardLinesDrawn = true;
+          }
+        }
+      }
+    }
   }
 
   /**
