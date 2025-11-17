@@ -11,7 +11,7 @@
  * each of which is required to have a default color. Note that dynamic colors can be edited by running the sim from
  * phetmarks using the "Color Edit" mode.
  *
- * @author {{AUTHOR}}
+ * @author Luke Thorne
  */
 
 import ProfileColorProperty from '../../../scenery/js/util/ProfileColorProperty.js';

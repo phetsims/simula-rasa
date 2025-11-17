@@ -17,4 +17,3 @@ node_modules/
 *~
 .cache
 .parcel-cache
-js\amortization-calc\view\AmortizationCalcScreenView-refactored.ts

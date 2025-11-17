@@ -3,7 +3,7 @@
 /**
  * TODO Describe this class and its responsibilities.
  *
- * @author {{AUTHOR}}
+ * @author Luke Thorne
  */
 
 import Screen, { ScreenOptions } from '../../../joist/js/Screen.js';

@@ -89,7 +89,8 @@ export default class AmortizationCalcScreenView extends ScreenView {
   public constructor( model: AmortizationCalcModel, providedOptions: AmortizationCalcScreenViewOptions ) {
 
     const options = optionize<AmortizationCalcScreenViewOptions, SelfOptions, ScreenViewOptions>()( {
-      // No additional options needed
+      // Accessibility options
+      tandem: providedOptions.tandem
     }, providedOptions );
 
     super( options );
@@ -100,7 +101,10 @@ export default class AmortizationCalcScreenView extends ScreenView {
     const controlTitleText = new Text( 'Loan Explorer', {
       font: TITLE_FONT,
       fill: ACCENT_COLOR,
-      tandem: options.tandem.createTandem( 'controlTitleText' )
+      tandem: options.tandem.createTandem( 'controlTitleText' ),
+      // Accessibility
+      tagName: 'h2',
+      innerContent: 'Loan Explorer Controls'
     } );
 
     // Create NumberControl for Loan Amount
@@ -129,12 +133,23 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Create radio button group for Term Years (15 or 30)
     const termYearsLabel = new Text( 'Term:', {
-      font: LABEL_FONT
+      font: LABEL_FONT,
+      // Accessibility
+      tagName: 'label',
+      innerContent: 'Loan Term'
     } );
     
     const termYearsRadioButtonGroup = new AquaRadioButtonGroup( model.termYearsProperty, [
-      { value: 15, createNode: () => new Text( '15 years', { font: LABEL_FONT } ), tandemName: 'fifteenYearsRadioButton' },
-      { value: 30, createNode: () => new Text( '30 years', { font: LABEL_FONT } ), tandemName: 'thirtyYearsRadioButton' }
+      { 
+        value: 15, 
+        createNode: () => new Text( '15 years', { font: LABEL_FONT } ), 
+        tandemName: 'fifteenYearsRadioButton'
+      },
+      { 
+        value: 30, 
+        createNode: () => new Text( '30 years', { font: LABEL_FONT } ), 
+        tandemName: 'thirtyYearsRadioButton'
+      }
     ], {
       spacing: 8,
       radioButtonOptions: {
@@ -146,7 +161,11 @@ export default class AmortizationCalcScreenView extends ScreenView {
     const termYearsControl = new VBox( {
       children: [ termYearsLabel, termYearsRadioButtonGroup ],
       spacing: 5,
-      align: 'left'
+      align: 'left',
+      // Accessibility
+      tagName: 'fieldset',
+      labelTagName: 'legend',
+      labelContent: 'Choose loan term: 15 or 30 years'
     } );
 
     // Create NumberControl for Interest Rate
@@ -189,14 +208,20 @@ export default class AmortizationCalcScreenView extends ScreenView {
       },
       xMargin: 20,
       yMargin: 10,
-      tandem: options.tandem.createTandem( 'calculateButton' )
+      tandem: options.tandem.createTandem( 'calculateButton' ),
+      // Accessibility
+      innerContent: 'Amortize',
+      appendDescription: true
     } );
 
     // Results summary text for monthly payment only
     this.resultsText = new Text( '', {
       font: RESULTS_FONT,
       fill: 'black',
-      tandem: options.tandem.createTandem( 'resultsText' )
+      tandem: options.tandem.createTandem( 'resultsText' ),
+      // Accessibility
+      tagName: 'p',
+      accessibleName: 'Calculation Results'
     } );
 
     // Comparison text showing impact of extra payments
@@ -229,7 +254,12 @@ export default class AmortizationCalcScreenView extends ScreenView {
       cornerRadius: 8,
       xMargin: 20,
       yMargin: 15,
-      tandem: options.tandem.createTandem( 'controlPanel' )
+      tandem: options.tandem.createTandem( 'controlPanel' ),
+      // Accessibility
+      tagName: 'div',
+      labelTagName: 'h2',
+      labelContent: 'Loan Parameters',
+      descriptionContent: 'Set the loan amount, term, and interest rate to calculate your amortization schedule'
     } );
 
     // Position control panel at top left
@@ -240,7 +270,10 @@ export default class AmortizationCalcScreenView extends ScreenView {
     // Create Extra Payment Panel (initially hidden/locked)
     const extraPaymentTitleText = new Text( 'What happens when you extra?', {
       font: new PhetFont( { size: 16, weight: 'bold' } ),
-      fill: new Color( '#0a8a0a' )
+      fill: new Color( '#0a8a0a' ),
+      // Accessibility
+      tagName: 'h3',
+      innerContent: 'Extra Payment Exploration'
     } );
 
     // Create NumberControl for Extra Monthly Payment
@@ -282,7 +315,10 @@ export default class AmortizationCalcScreenView extends ScreenView {
       },
       xMargin: 20,
       yMargin: 10,
-      tandem: options.tandem.createTandem( 'reAmortizeButton' )
+      tandem: options.tandem.createTandem( 'reAmortizeButton' ),
+      // Accessibility
+      innerContent: 'Re-amortize with Extra Payment',
+      appendDescription: true
     } );
 
     const extraPanelContent = new VBox( {
@@ -304,7 +340,12 @@ export default class AmortizationCalcScreenView extends ScreenView {
       xMargin: 20,
       yMargin: 15,
       visible: false, // Initially hidden until first calculation
-      tandem: options.tandem.createTandem( 'extraPaymentPanel' )
+      tandem: options.tandem.createTandem( 'extraPaymentPanel' ),
+      // Accessibility
+      tagName: 'div',
+      labelTagName: 'h3',
+      labelContent: 'Extra Payment Options',
+      descriptionContent: 'Explore how making extra monthly payments can reduce your loan term and save on interest'
     } );
 
     // Position extra payment panel below control panel
@@ -316,7 +357,10 @@ export default class AmortizationCalcScreenView extends ScreenView {
     this.graphTitleText = new Text( 'Payment Breakdown', {
       font: new PhetFont( { size: 16, weight: 'bold' } ),
       fill: ACCENT_COLOR,
-      tandem: options.tandem.createTandem( 'graphTitleText' )
+      tandem: options.tandem.createTandem( 'graphTitleText' ),
+      // Accessibility
+      tagName: 'h2',
+      innerContent: 'Payment Breakdown Over Time'
     } );
 
     // Info box for graph (will be updated with metrics)
@@ -348,7 +392,12 @@ export default class AmortizationCalcScreenView extends ScreenView {
       cornerRadius: 8,
       xMargin: 15,
       yMargin: 15,
-      tandem: options.tandem.createTandem( 'combinedGraphPanel' )
+      tandem: options.tandem.createTandem( 'combinedGraphPanel' ),
+      // Accessibility
+      tagName: 'div',
+      labelTagName: 'h2',
+      labelContent: 'Interactive Payment Chart',
+      descriptionContent: 'Line chart showing how principal and interest payments change over the life of the loan. Hover over the chart to see detailed values for each month.'
     } );
 
     // Position combined graph on right side
@@ -574,11 +623,19 @@ export default class AmortizationCalcScreenView extends ScreenView {
       if ( model.loanAmountProperty.value <= 0 || model.termYearsProperty.value <= 0 ) {
         this.resultsText.string = 'Please enter positive values';
         this.comparisonText.string = '';
+        // Update accessibility description
+        this.resultsText.descriptionContent = 'Please enter positive values for loan amount and term';
         return;
       }
 
       // Update results text to show only monthly payment
-      this.resultsText.string = `Monthly Payment: $${formatNumber( monthlyPayment )}`;
+      const monthlyPaymentFormatted = formatNumber( monthlyPayment );
+      this.resultsText.string = `Monthly Payment: $${monthlyPaymentFormatted}`;
+      
+      // Update accessibility description with full context
+      this.resultsText.descriptionContent = `Your monthly payment is $${monthlyPaymentFormatted}. ` +
+        `Total interest over ${schedule.length} months: $${formatNumber( totalInterest )}. ` +
+        `Total amount paid: $${formatNumber( totalPaid )}.`;
 
       // Update info box with metrics
       this.graphInfoBox.removeAllChildren();
@@ -651,11 +708,18 @@ export default class AmortizationCalcScreenView extends ScreenView {
       } );
       this.graphInfoBox.addChild( extraMetrics );
 
-      // Update comparison text if extra payments are being made
+      // Update comparison text and accessibility if extra payments are being made
       if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
         const monthsSaved = model.monthsSavedProperty.value;
         const interestSaved = model.interestSavedProperty.value;
         const yearsSaved = ( monthsSaved / 12 ).toFixed( 1 );
+        
+        // Update comparison text accessibility description
+        this.comparisonText.descriptionContent = `By paying an extra $${formatNumber( extraPayment )} per month, ` +
+          `you will save ${monthsSaved} months (${yearsSaved} years) and $${formatNumber( interestSaved )} in interest. ` +
+          `Your loan will be paid off in ${scheduleWithExtra.length} months instead of ${schedule.length} months.`;
+      } else {
+        this.comparisonText.descriptionContent = '';
       }
 
       // Render combined graph with both scenarios (use truncated schedules)
