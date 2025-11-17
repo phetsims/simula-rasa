@@ -13,6 +13,7 @@ import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
 import PhetFont from '../../../../scenery-phet/js/PhetFont.js';
 import NumberControl from '../../../../scenery-phet/js/NumberControl.js';
+import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import AquaRadioButtonGroup from '../../../../sun/js/AquaRadioButtonGroup.js';
 import Panel from '../../../../sun/js/Panel.js';
 import RectangularPushButton from '../../../../sun/js/buttons/RectangularPushButton.js';
@@ -67,6 +68,13 @@ export default class AmortizationCalcScreenView extends ScreenView {
   private standardPrincipalPlot: CanvasLinePlot | null = null;
   private extraInterestPlot: CanvasLinePlot | null = null;
   private extraPrincipalPlot: CanvasLinePlot | null = null;
+  private animationProgress: NumberProperty = new NumberProperty( 0 );
+  private fullStandardInterestData: Vector2[] = [];
+  private fullStandardPrincipalData: Vector2[] = [];
+  private fullExtraInterestData: Vector2[] = [];
+  private fullExtraPrincipalData: Vector2[] = [];
+  private isAnimating: boolean = false;
+  private standardLinesDrawn: boolean = false;
 
   public constructor( model: AmortizationCalcModel, providedOptions: AmortizationCalcScreenViewOptions ) {
 
@@ -368,6 +376,11 @@ export default class AmortizationCalcScreenView extends ScreenView {
       this.standardPrincipalPlot = null;
       this.extraInterestPlot = null;
       this.extraPrincipalPlot = null;
+      
+      // If recalculating without extra payments, reset the flag so animation plays
+      if ( extraSchedule.length === 0 ) {
+        this.standardLinesDrawn = false;
+      }
 
       if ( standardSchedule.length === 0 ) return;
 
@@ -422,17 +435,25 @@ export default class AmortizationCalcScreenView extends ScreenView {
         return schedule.map( ( entry, index ) => new Vector2( index, entry[ field ] || 0 ) );
       };
 
-      // Create standard interest plot (orange)
-      const standardInterestData = scheduleToDataPoints( standardSchedule, 'interest' );
-      this.standardInterestPlot = new CanvasLinePlot( this.chartTransform, standardInterestData, {
+      // Store full datasets for animation
+      this.fullStandardInterestData = scheduleToDataPoints( standardSchedule, 'interest' );
+      this.fullStandardPrincipalData = scheduleToDataPoints( standardSchedule, 'principal' );
+
+      // If adding extra payment and standard lines already drawn, show them instantly as dashed
+      const standardInitialData = ( extraSchedule.length > 0 && this.standardLinesDrawn ) 
+        ? this.fullStandardInterestData 
+        : [];
+      const principalInitialData = ( extraSchedule.length > 0 && this.standardLinesDrawn )
+        ? this.fullStandardPrincipalData
+        : [];
+
+      this.standardInterestPlot = new CanvasLinePlot( this.chartTransform, standardInitialData, {
         stroke: new Color( 232, 116, 59 ), // #e8743b
         lineWidth: extraSchedule.length > 0 ? 1.5 : 2,
         lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
       } );
 
-      // Create standard principal plot (green)
-      const standardPrincipalData = scheduleToDataPoints( standardSchedule, 'principal' );
-      this.standardPrincipalPlot = new CanvasLinePlot( this.chartTransform, standardPrincipalData, {
+      this.standardPrincipalPlot = new CanvasLinePlot( this.chartTransform, principalInitialData, {
         stroke: new Color( 25, 169, 121 ), // #19a979
         lineWidth: extraSchedule.length > 0 ? 1.5 : 2,
         lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
@@ -441,26 +462,35 @@ export default class AmortizationCalcScreenView extends ScreenView {
       // Collect all painters for ChartCanvasNode
       const painters = [ this.standardInterestPlot, this.standardPrincipalPlot ];
 
-      // If extra schedule exists, draw those lines (solid, more prominent)
+      // If extra schedule exists, prepare those lines too (use truncated data from model)
       if ( extraSchedule.length > 0 ) {
-        const extraInterestData = scheduleToDataPoints( extraSchedule, 'interest' );
-        this.extraInterestPlot = new CanvasLinePlot( this.chartTransform, extraInterestData, {
+        // Get datasets - already truncated by model to exclude partial payments
+        this.fullExtraInterestData = scheduleToDataPoints( extraSchedule, 'interest' );
+        this.fullExtraPrincipalData = scheduleToDataPoints( extraSchedule, 'principal' );
+
+        this.extraInterestPlot = new CanvasLinePlot( this.chartTransform, [], {
           stroke: new Color( 232, 116, 59 ), // #e8743b
           lineWidth: 3
         } );
         painters.push( this.extraInterestPlot );
 
-        const extraPrincipalData = scheduleToDataPoints( extraSchedule, 'principal' );
-        this.extraPrincipalPlot = new CanvasLinePlot( this.chartTransform, extraPrincipalData, {
+        this.extraPrincipalPlot = new CanvasLinePlot( this.chartTransform, [], {
           stroke: new Color( 25, 169, 121 ), // #19a979
           lineWidth: 3
         } );
         painters.push( this.extraPrincipalPlot );
+      } else {
+        this.fullExtraInterestData = [];
+        this.fullExtraPrincipalData = [];
       }
 
       // Create ChartCanvasNode to render all the plots
       this.chartCanvasNode = new ChartCanvasNode( this.chartTransform, painters );
       this.chartNode.addChild( this.chartCanvasNode );
+
+      // Start animation from beginning
+      this.animationProgress.value = 0;
+      this.isAnimating = true;
 
       // Add year labels on x-axis
       for ( let year = 1; year <= termYears; year++ ) {
@@ -515,7 +545,8 @@ export default class AmortizationCalcScreenView extends ScreenView {
       const monthlyPayment = model.monthlyPaymentProperty.value;
       const totalInterest = model.totalInterestProperty.value;
       const totalPaid = model.totalPaidProperty.value;
-      const schedule = model.scheduleArray.slice();
+      const schedule = model.scheduleArray.slice(); // Full schedule for totals
+      const scheduleTruncated = model.scheduleArrayTruncated.slice(); // Truncated for graphing
       const extraPayment = model.extraMonthlyPaymentProperty.value;
 
       if ( model.loanAmountProperty.value <= 0 || model.termYearsProperty.value <= 0 ) {
@@ -551,31 +582,52 @@ export default class AmortizationCalcScreenView extends ScreenView {
       } );
       this.graphInfoBox.addChild( standardMetrics );
       
-      // Extra scenario metrics (if applicable)
-      const scheduleWithExtra = model.scheduleWithExtraArray.slice();
+      // Extra scenario metrics - always show placeholder to prevent graph shifting
+      const scheduleWithExtra = model.scheduleWithExtraArray.slice(); // Full for totals
+      const scheduleWithExtraTruncated = model.scheduleWithExtraArrayTruncated.slice(); // Truncated for graphing
+      
+      let extraMonthsText: Text;
+      let extraTotalText: Text;
+      let extraInterestText: Text;
+      
       if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
+        // Show actual extra payment metrics
         const totalPaidWithExtra = model.totalPaidWithExtraProperty.value;
         const totalInterestWithExtra = model.totalInterestWithExtraProperty.value;
         
-        const extraMonthsText = new Text( `With Extra: ${scheduleWithExtra.length} months`, {
+        extraMonthsText = new Text( `With Extra: ${scheduleWithExtra.length} months`, {
           font: new PhetFont( 11 ),
           fill: '#666'
         } );
-        const extraTotalText = new Text( `Total: $${formatNumber( totalPaidWithExtra )}`, {
+        extraTotalText = new Text( `Total: $${formatNumber( totalPaidWithExtra )}`, {
           font: new PhetFont( { size: 11, weight: 'bold' } ),
           fill: '#333'
         } );
-        const extraInterestText = new Text( `Interest: $${formatNumber( totalInterestWithExtra )}`, {
+        extraInterestText = new Text( `Interest: $${formatNumber( totalInterestWithExtra )}`, {
           font: new PhetFont( 11 ),
           fill: '#19a979'
         } );
-        
-        const extraMetrics = new HBox( {
-          children: [ extraMonthsText, extraTotalText, extraInterestText ],
-          spacing: 15
+      } else {
+        // Show empty placeholder to maintain spacing
+        extraMonthsText = new Text( ' ', {
+          font: new PhetFont( 11 ),
+          fill: '#666'
         } );
-        this.graphInfoBox.addChild( extraMetrics );
+        extraTotalText = new Text( ' ', {
+          font: new PhetFont( { size: 11, weight: 'bold' } ),
+          fill: '#333'
+        } );
+        extraInterestText = new Text( ' ', {
+          font: new PhetFont( 11 ),
+          fill: '#19a979'
+        } );
       }
+      
+      const extraMetrics = new HBox( {
+        children: [ extraMonthsText, extraTotalText, extraInterestText ],
+        spacing: 15
+      } );
+      this.graphInfoBox.addChild( extraMetrics );
 
       // Update comparison text if extra payments are being made
       if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
@@ -587,23 +639,52 @@ export default class AmortizationCalcScreenView extends ScreenView {
         this.comparisonText.string = extraPayment === 0 ? '💡 Try adding an extra monthly payment to see the impact!' : '';
       }
 
-      // Render combined graph with both scenarios
-      renderCombinedGraph( this.combinedGraphContainer, schedule, scheduleWithExtra, 600, 450 );
+      // Render combined graph with both scenarios (use truncated schedules)
+      renderCombinedGraph( this.combinedGraphContainer, scheduleTruncated, scheduleWithExtraTruncated, 600, 450 );
     };
 
-    // Listen to model changes - need to watch BOTH schedules
+    // Listen to model changes - watch properties that are set AFTER computation completes
     const scheduleListener = () => updateView();
-    model.scheduleArray.elementAddedEmitter.addListener( scheduleListener );
-    model.scheduleArray.elementRemovedEmitter.addListener( scheduleListener );
-    model.scheduleWithExtraArray.elementAddedEmitter.addListener( scheduleListener );
-    model.scheduleWithExtraArray.elementRemovedEmitter.addListener( scheduleListener );
+    // Listen to properties that indicate computation is complete
+    model.monthlyPaymentProperty.link( scheduleListener );
+    model.totalInterestProperty.link( scheduleListener );
+    model.totalPaidProperty.link( scheduleListener );
+    // Also listen to extra payment properties for Re-amortize updates
+    model.totalInterestWithExtraProperty.link( scheduleListener );
+    model.totalPaidWithExtraProperty.link( scheduleListener );
 
     // Don't render initially - wait for user to click Amortize
 
     // Reset button
     const resetAllButton = new ResetAllButton( {
       listener: () => {
-        model.reset();
+        // Dispose chart components properly BEFORE resetting model
+        if ( this.chartCanvasNode ) {
+          this.chartCanvasNode.dispose();
+          this.chartCanvasNode = null;
+        }
+        if ( this.standardInterestPlot ) {
+          this.standardInterestPlot.dispose();
+          this.standardInterestPlot = null;
+        }
+        if ( this.standardPrincipalPlot ) {
+          this.standardPrincipalPlot.dispose();
+          this.standardPrincipalPlot = null;
+        }
+        if ( this.extraInterestPlot ) {
+          this.extraInterestPlot.dispose();
+          this.extraInterestPlot = null;
+        }
+        if ( this.extraPrincipalPlot ) {
+          this.extraPrincipalPlot.dispose();
+          this.extraPrincipalPlot = null;
+        }
+        
+        // Reset animation state
+        this.standardLinesDrawn = false;
+        this.isAnimating = false;
+        this.animationProgress.value = 0;
+        
         // Clear the graph
         this.combinedGraphContainer.removeAllChildren();
         this.combinedGraphContainer.addChild( new Rectangle( 0, 0, 600, 450, {
@@ -616,6 +697,25 @@ export default class AmortizationCalcScreenView extends ScreenView {
         this.graphInfoBox.removeAllChildren();
         this.graphInfoBox.addChild( this.graphTitleText );
         this.extraPaymentPanel.visible = false;
+        
+        // Reset model properties without computing schedule
+        model.loanAmountProperty.reset();
+        model.termYearsProperty.reset();
+        model.interestRateProperty.reset();
+        model.extraMonthlyPaymentProperty.reset();
+        
+        // Clear model schedules and properties manually
+        model.scheduleArray.clear();
+        model.scheduleArrayTruncated.clear();
+        model.scheduleWithExtraArray.clear();
+        model.scheduleWithExtraArrayTruncated.clear();
+        model.monthlyPaymentProperty.value = 0;
+        model.totalInterestProperty.value = 0;
+        model.totalPaidProperty.value = 0;
+        model.totalInterestWithExtraProperty.value = 0;
+        model.totalPaidWithExtraProperty.value = 0;
+        model.monthsSavedProperty.value = 0;
+        model.interestSavedProperty.value = 0;
       },
       right: this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN,
       bottom: this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN,
@@ -625,10 +725,12 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Disposal
     this.disposeAmortizationCalcScreenView = () => {
-      model.scheduleArray.elementAddedEmitter.removeListener( scheduleListener );
-      model.scheduleArray.elementRemovedEmitter.removeListener( scheduleListener );
-      model.scheduleWithExtraArray.elementAddedEmitter.removeListener( scheduleListener );
-      model.scheduleWithExtraArray.elementRemovedEmitter.removeListener( scheduleListener );
+      // Unlink property listeners
+      model.monthlyPaymentProperty.unlink( scheduleListener );
+      model.totalInterestProperty.unlink( scheduleListener );
+      model.totalPaidProperty.unlink( scheduleListener );
+      model.totalInterestWithExtraProperty.unlink( scheduleListener );
+      model.totalPaidWithExtraProperty.unlink( scheduleListener );
       controlPanel.dispose();
       this.extraPaymentPanel.dispose();
       combinedGraphPanel.dispose();
@@ -654,7 +756,51 @@ export default class AmortizationCalcScreenView extends ScreenView {
    * @param dt - time step, in seconds
    */
   public override step( dt: number ): void {
-    // no-op unless animations are added
+    if ( this.isAnimating && this.chartCanvasNode ) {
+      // Animate over 2 seconds total (optimized for performance)
+      const maxMonths = Math.max(
+        this.fullStandardInterestData.length,
+        this.fullExtraInterestData.length
+      );
+      
+      if ( maxMonths > 0 ) {
+        // Increment progress (complete animation in 2 seconds)
+        const increment = ( dt / 2.0 ) * maxMonths;
+        this.animationProgress.value = Math.min( this.animationProgress.value + increment, maxMonths );
+        
+        const currentMonth = Math.floor( this.animationProgress.value );
+        
+        // Only animate standard plots if they haven't been drawn yet (first time)
+        if ( !this.standardLinesDrawn ) {
+          if ( this.standardInterestPlot && currentMonth > 0 ) {
+            this.standardInterestPlot.setDataSet( this.fullStandardInterestData.slice( 0, currentMonth ) );
+          }
+          if ( this.standardPrincipalPlot && currentMonth > 0 ) {
+            this.standardPrincipalPlot.setDataSet( this.fullStandardPrincipalData.slice( 0, currentMonth ) );
+          }
+        }
+        
+        // Update extra plots if they exist
+        if ( this.extraInterestPlot && this.fullExtraInterestData.length > 0 && currentMonth > 0 ) {
+          this.extraInterestPlot.setDataSet( this.fullExtraInterestData.slice( 0, Math.min( currentMonth, this.fullExtraInterestData.length ) ) );
+        }
+        if ( this.extraPrincipalPlot && this.fullExtraPrincipalData.length > 0 && currentMonth > 0 ) {
+          this.extraPrincipalPlot.setDataSet( this.fullExtraPrincipalData.slice( 0, Math.min( currentMonth, this.fullExtraPrincipalData.length ) ) );
+        }
+        
+        // Trigger canvas redraw
+        this.chartCanvasNode.update();
+        
+        // Stop animating when complete
+        if ( this.animationProgress.value >= maxMonths ) {
+          this.isAnimating = false;
+          // Mark standard lines as fully drawn if we just animated them
+          if ( !this.standardLinesDrawn && this.fullExtraInterestData.length === 0 ) {
+            this.standardLinesDrawn = true;
+          }
+        }
+      }
+    }
   }
 
   /**

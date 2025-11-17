@@ -37,6 +37,7 @@ export default class AmortizationCalcModel implements TModel {
   public readonly totalInterestProperty: Property<number>;
   public readonly totalPaidProperty: Property<number>;
   public readonly scheduleArray: ObservableArray<AmortizationEntry>;
+  public readonly scheduleArrayTruncated: ObservableArray<AmortizationEntry>; // For graphing - excludes partial payments
 
   // Computed values for scenario with extra payments
   public readonly totalInterestWithExtraProperty: Property<number>;
@@ -44,6 +45,7 @@ export default class AmortizationCalcModel implements TModel {
   public readonly monthsSavedProperty: Property<number>;
   public readonly interestSavedProperty: Property<number>;
   public readonly scheduleWithExtraArray: ObservableArray<AmortizationEntry>;
+  public readonly scheduleWithExtraArrayTruncated: ObservableArray<AmortizationEntry>; // For graphing - excludes partial payments
 
   public constructor( providedOptions: AmortizationCalcModelOptions ) {
 
@@ -89,6 +91,7 @@ export default class AmortizationCalcModel implements TModel {
 
     // Initialize amortization schedule as an observable array
     this.scheduleArray = createObservableArray<AmortizationEntry>();
+    this.scheduleArrayTruncated = createObservableArray<AmortizationEntry>(); // For graphing
 
     // Initialize properties for extra payment scenario
     this.totalInterestWithExtraProperty = new Property<number>( 0, {
@@ -116,6 +119,7 @@ export default class AmortizationCalcModel implements TModel {
     } );
 
     this.scheduleWithExtraArray = createObservableArray<AmortizationEntry>();
+    this.scheduleWithExtraArrayTruncated = createObservableArray<AmortizationEntry>(); // For graphing
 
     // Don't compute initial schedule - wait for user to click Amortize
   }
@@ -146,6 +150,24 @@ export default class AmortizationCalcModel implements TModel {
     this.scheduleArray.clear();
     schedule.forEach( entry => this.scheduleArray.push( entry ) );
 
+    // Create truncated schedule for graphing (exclude payments that drop below previous)
+    this.scheduleArrayTruncated.clear();
+    if ( schedule.length > 0 ) {
+      // Always include first payment
+      this.scheduleArrayTruncated.push( schedule[ 0 ] );
+      
+      // Include subsequent payments only if >= previous payment drawn
+      for ( let i = 1; i < schedule.length; i++ ) {
+        const previousPrincipal = schedule[ i - 1 ].principal;
+        if ( schedule[ i ].principal >= previousPrincipal ) {
+          this.scheduleArrayTruncated.push( schedule[ i ] );
+        } else {
+          // Stop at first payment that drops below previous
+          break;
+        }
+      }
+    }
+
     // Update computed properties for standard scenario
     const monthlyPayment = schedule.length > 0 ? schedule[ 0 ].payment : 0;
     const totalInterest = schedule.reduce( ( sum, entry ) => sum + entry.interest, 0 );
@@ -163,6 +185,24 @@ export default class AmortizationCalcModel implements TModel {
       this.scheduleWithExtraArray.clear();
       scheduleWithExtra.forEach( entry => this.scheduleWithExtraArray.push( entry ) );
 
+      // Create truncated schedule for graphing (exclude payments that drop below previous)
+      this.scheduleWithExtraArrayTruncated.clear();
+      if ( scheduleWithExtra.length > 0 ) {
+        // Always include first payment
+        this.scheduleWithExtraArrayTruncated.push( scheduleWithExtra[ 0 ] );
+        
+        // Include subsequent payments only if >= previous payment drawn
+        for ( let i = 1; i < scheduleWithExtra.length; i++ ) {
+          const previousPrincipal = scheduleWithExtra[ i - 1 ].principal;
+          if ( scheduleWithExtra[ i ].principal >= previousPrincipal ) {
+            this.scheduleWithExtraArrayTruncated.push( scheduleWithExtra[ i ] );
+          } else {
+            // Stop at first payment that drops below previous
+            break;
+          }
+        }
+      }
+
       const totalInterestWithExtra = scheduleWithExtra.reduce( ( sum, entry ) => sum + entry.interest, 0 );
       const totalPaidWithExtra = scheduleWithExtra.reduce( ( sum, entry ) => sum + entry.payment, 0 );
 
@@ -173,6 +213,7 @@ export default class AmortizationCalcModel implements TModel {
     } else {
       // No extra payment - clear the extra scenario
       this.scheduleWithExtraArray.clear();
+      this.scheduleWithExtraArrayTruncated.clear();
       this.totalInterestWithExtraProperty.value = 0;
       this.totalPaidWithExtraProperty.value = 0;
       this.monthsSavedProperty.value = 0;
