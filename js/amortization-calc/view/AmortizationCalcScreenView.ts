@@ -14,6 +14,7 @@ import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.j
 import PhetFont from '../../../../scenery-phet/js/PhetFont.js';
 import NumberControl from '../../../../scenery-phet/js/NumberControl.js';
 import AquaRadioButtonGroup from '../../../../sun/js/AquaRadioButtonGroup.js';
+import Panel from '../../../../sun/js/Panel.js';
 import RectangularPushButton from '../../../../sun/js/buttons/RectangularPushButton.js';
 import VBox from '../../../../scenery/js/layout/nodes/VBox.js';
 import HBox from '../../../../scenery/js/layout/nodes/HBox.js';
@@ -144,8 +145,8 @@ export default class AmortizationCalcScreenView extends ScreenView {
     } );
 
     // Create NumberControl for Extra Monthly Payment
-    const extraPaymentControl = new NumberControl( 'Extra Payment ($):', model.extraMonthlyPaymentProperty, new Range( 0, 5000 ), {
-      delta: 50,
+    const extraPaymentControl = new NumberControl( 'Extra Monthly Payment ($):', model.extraMonthlyPaymentProperty, new Range(0, 1000 ), {
+      delta: 25,
       numberDisplayOptions: {
         decimalPlaces: 0,
         align: 'right',
@@ -224,10 +225,21 @@ export default class AmortizationCalcScreenView extends ScreenView {
       align: 'center'
     } );
 
+    // Wrap control panel in Panel component
+    const controlPanel = new Panel( controlPanelContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#ccc' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 20,
+      yMargin: 15,
+      tandem: options.tandem.createTandem( 'controlPanel' )
+    } );
+
     // Position control panel at top, full width
-    controlPanelContent.centerX = this.layoutBounds.centerX;
-    controlPanelContent.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
-    this.addChild( controlPanelContent );
+    controlPanel.centerX = this.layoutBounds.centerX;
+    controlPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
+    this.addChild( controlPanel );
 
     // Standard Scenario Graph Panel
     this.standardTitleText = new Text( 'Standard Payments', {
@@ -257,10 +269,21 @@ export default class AmortizationCalcScreenView extends ScreenView {
       align: 'center'
     } );
 
+    // Wrap standard graph in Panel component
+    const standardGraphPanel = new Panel( standardGraphContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#ccc' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 15,
+      yMargin: 15,
+      tandem: options.tandem.createTandem( 'standardGraphPanel' )
+    } );
+
     // Position standard graph at bottom left
-    standardGraphContent.left = AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN + 20;
-    standardGraphContent.bottom = this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN - 60;
-    this.addChild( standardGraphContent );
+    standardGraphPanel.left = AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN + 20;
+    standardGraphPanel.bottom = this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN - 60;
+    this.addChild( standardGraphPanel );
 
     // Extra Payment Scenario Graph Panel
     this.extraTitleText = new Text( 'With Extra Payments', {
@@ -290,10 +313,21 @@ export default class AmortizationCalcScreenView extends ScreenView {
       align: 'center'
     } );
 
+    // Wrap extra graph in Panel component
+    const extraGraphPanel = new Panel( extraGraphContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#ccc' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 15,
+      yMargin: 15,
+      tandem: options.tandem.createTandem( 'extraGraphPanel' )
+    } );
+
     // Position extra graph at bottom right, aligned with standard graph
-    extraGraphContent.left = standardGraphContent.right + 30;
-    extraGraphContent.bottom = standardGraphContent.bottom;
-    this.addChild( extraGraphContent );
+    extraGraphPanel.left = standardGraphPanel.right + 30;
+    extraGraphPanel.bottom = standardGraphPanel.bottom;
+    this.addChild( extraGraphPanel );
 
     // Helper function to render animated area graph
     const renderAreaGraph = ( container: Node, schedule: any[], graphWidth: number, graphHeight: number ): void => {
@@ -600,9 +634,9 @@ export default class AmortizationCalcScreenView extends ScreenView {
       model.scheduleArray.elementRemovedEmitter.removeListener( scheduleListener );
       model.scheduleWithExtraArray.elementAddedEmitter.removeListener( scheduleListener );
       model.scheduleWithExtraArray.elementRemovedEmitter.removeListener( scheduleListener );
-      controlPanelContent.dispose();
-      standardGraphContent.dispose();
-      extraGraphContent.dispose();
+      controlPanel.dispose();
+      standardGraphPanel.dispose();
+      extraGraphPanel.dispose();
       resetAllButton.dispose();
       loanAmountControl.dispose();
       termYearsRadioButtonGroup.dispose();
