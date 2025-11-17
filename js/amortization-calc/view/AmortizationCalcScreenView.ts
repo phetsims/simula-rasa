@@ -33,6 +33,8 @@ import AxisLine from '../../../../bamboo/js/AxisLine.js';
 import GridLineSet from '../../../../bamboo/js/GridLineSet.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
+import Circle from '../../../../scenery/js/nodes/Circle.js';
+import Line from '../../../../scenery/js/nodes/Line.js';
 import { renderAmortizationTable, formatNumber, aggregateByYear } from '../../amortizationTable.js';
 import AmortizationCalcConstants from '../../common/AmortizationCalcConstants.js';
 import amortizationCalc from '../../amortizationCalc.js';
@@ -75,6 +77,14 @@ export default class AmortizationCalcScreenView extends ScreenView {
   private fullExtraPrincipalData: Vector2[] = [];
   private isAnimating: boolean = false;
   private standardLinesDrawn: boolean = false;
+  private cursorLine: Line | null = null;
+  private principalCircle: Circle | null = null;
+  private interestCircle: Circle | null = null;
+  private principalTooltip: Panel | null = null;
+  private interestTooltip: Panel | null = null;
+  private chartHitArea: Rectangle | null = null;
+  private activeSchedule: any[] = [];
+  private monthLabel: Panel | null = null;
 
   public constructor( model: AmortizationCalcModel, providedOptions: AmortizationCalcScreenViewOptions ) {
 
@@ -140,7 +150,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
     } );
 
     // Create NumberControl for Interest Rate
-    const interestRateControl = new NumberControl( 'Interest Rate (%):', model.interestRateProperty, new Range( 0, 20 ), {
+    const interestRateControl = new NumberControl( 'Interest Rate (%):', model.interestRateProperty, new Range( 0, 12 ), {
       delta: 0.1,
       numberDisplayOptions: {
         decimalPlaces: 2,
@@ -224,11 +234,11 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Position control panel at top left
     controlPanel.left = AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN + 20;
-    controlPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
+    controlPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN;
     this.addChild( controlPanel );
 
     // Create Extra Payment Panel (initially hidden/locked)
-    const extraPaymentTitleText = new Text( 'Discovery Mode', {
+    const extraPaymentTitleText = new Text( 'What happens when you extra?', {
       font: new PhetFont( { size: 16, weight: 'bold' } ),
       fill: new Color( '#0a8a0a' )
     } );
@@ -241,6 +251,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
         align: 'right',
         xMargin: 10,
         yMargin: 5,
+        useRichText: false,
         textOptions: {
           font: LABEL_FONT
         }
@@ -298,7 +309,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Position extra payment panel below control panel
     this.extraPaymentPanel.left = controlPanel.left;
-    this.extraPaymentPanel.top = controlPanel.bottom + 20;
+    this.extraPaymentPanel.top = controlPanel.bottom ;
     this.addChild( this.extraPaymentPanel );
 
     // Combined Graph Panel
@@ -342,7 +353,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
     // Position combined graph on right side
     combinedGraphPanel.right = this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN - 20;
-    combinedGraphPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
+    combinedGraphPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN;
     this.addChild( combinedGraphPanel );
 
     // Initialize chart transform and node for bamboo charts
@@ -439,7 +450,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       this.fullStandardInterestData = scheduleToDataPoints( standardSchedule, 'interest' );
       this.fullStandardPrincipalData = scheduleToDataPoints( standardSchedule, 'principal' );
 
-      // If adding extra payment and standard lines already drawn, show them instantly as dashed
+      // If adding extra payment and standard lines already drawn, show them instantly with lighter colors
       const standardInitialData = ( extraSchedule.length > 0 && this.standardLinesDrawn ) 
         ? this.fullStandardInterestData 
         : [];
@@ -447,15 +458,23 @@ export default class AmortizationCalcScreenView extends ScreenView {
         ? this.fullStandardPrincipalData
         : [];
 
+      // Use lighter colors when showing standard alongside extra payments
+      const standardInterestColor = extraSchedule.length > 0 
+        ? new Color( 232, 116, 59, 0.4 ) // Lighter orange with alpha
+        : new Color( 232, 116, 59 ); // Full orange
+      const standardPrincipalColor = extraSchedule.length > 0 
+        ? new Color( 25, 169, 121, 0.4 ) // Lighter green with alpha
+        : new Color( 25, 169, 121 ); // Full green
+
       this.standardInterestPlot = new CanvasLinePlot( this.chartTransform, standardInitialData, {
-        stroke: new Color( 232, 116, 59 ), // #e8743b
-        lineWidth: extraSchedule.length > 0 ? 1.5 : 2,
+        stroke: standardInterestColor,
+        lineWidth: 2,
         lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
       } );
 
       this.standardPrincipalPlot = new CanvasLinePlot( this.chartTransform, principalInitialData, {
-        stroke: new Color( 25, 169, 121 ), // #19a979
-        lineWidth: extraSchedule.length > 0 ? 1.5 : 2,
+        stroke: standardPrincipalColor,
+        lineWidth: 2,
         lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
       } );
 
@@ -527,7 +546,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       this.chartNode.addChild( legendText );
 
       if ( extraSchedule.length > 0 ) {
-        const dashedLegendText = new Text( 'Dashed: Standard | Solid: With Extra Payments', {
+        const dashedLegendText = new Text( 'Dashed/Light: Standard | Solid/Dark: With Extra Payments', {
           font: new PhetFont( 10 ),
           fill: '#666',
           centerX: graphWidth / 2,
@@ -538,6 +557,9 @@ export default class AmortizationCalcScreenView extends ScreenView {
 
       // Add the chart node to the container
       container.addChild( this.chartNode );
+      
+      // Add hover indicators for interactivity
+      this.addHoverIndicators( container, standardSchedule, extraSchedule );
     };
 
     // View update function - observes model and updates UI
@@ -634,9 +656,6 @@ export default class AmortizationCalcScreenView extends ScreenView {
         const monthsSaved = model.monthsSavedProperty.value;
         const interestSaved = model.interestSavedProperty.value;
         const yearsSaved = ( monthsSaved / 12 ).toFixed( 1 );
-        this.comparisonText.string = `🎉 Discovery! By paying $${formatNumber( extraPayment )} extra each month:\n• Pay off ${yearsSaved} years earlier!\n• Save $${formatNumber( interestSaved )} in interest!`;
-      } else {
-        this.comparisonText.string = extraPayment === 0 ? '💡 Try adding an extra monthly payment to see the impact!' : '';
       }
 
       // Render combined graph with both scenarios (use truncated schedules)
@@ -678,6 +697,34 @@ export default class AmortizationCalcScreenView extends ScreenView {
         if ( this.extraPrincipalPlot ) {
           this.extraPrincipalPlot.dispose();
           this.extraPrincipalPlot = null;
+        }
+        if ( this.cursorLine ) {
+          this.cursorLine.dispose();
+          this.cursorLine = null;
+        }
+        if ( this.principalCircle ) {
+          this.principalCircle.dispose();
+          this.principalCircle = null;
+        }
+        if ( this.interestCircle ) {
+          this.interestCircle.dispose();
+          this.interestCircle = null;
+        }
+        if ( this.principalTooltip ) {
+          this.principalTooltip.dispose();
+          this.principalTooltip = null;
+        }
+        if ( this.interestTooltip ) {
+          this.interestTooltip.dispose();
+          this.interestTooltip = null;
+        }
+        if ( this.chartHitArea ) {
+          this.chartHitArea.dispose();
+          this.chartHitArea = null;
+        }
+        if ( this.monthLabel ) {
+          this.monthLabel.dispose();
+          this.monthLabel = null;
         }
         
         // Reset animation state
@@ -731,6 +778,28 @@ export default class AmortizationCalcScreenView extends ScreenView {
       model.totalPaidProperty.unlink( scheduleListener );
       model.totalInterestWithExtraProperty.unlink( scheduleListener );
       model.totalPaidWithExtraProperty.unlink( scheduleListener );
+      // Dispose hover components
+      if ( this.cursorLine ) {
+        this.cursorLine.dispose();
+      }
+      if ( this.principalCircle ) {
+        this.principalCircle.dispose();
+      }
+      if ( this.interestCircle ) {
+        this.interestCircle.dispose();
+      }
+      if ( this.principalTooltip ) {
+        this.principalTooltip.dispose();
+      }
+      if ( this.interestTooltip ) {
+        this.interestTooltip.dispose();
+      }
+      if ( this.chartHitArea ) {
+        this.chartHitArea.dispose();
+      }
+      if ( this.monthLabel ) {
+        this.monthLabel.dispose();
+      }
       controlPanel.dispose();
       this.extraPaymentPanel.dispose();
       combinedGraphPanel.dispose();
@@ -742,6 +811,211 @@ export default class AmortizationCalcScreenView extends ScreenView {
       this.extraPaymentControl.dispose();
       reAmortizeButton.dispose();
     };
+  }
+
+  /**
+   * Adds interactive vertical line cursor with circles showing values at intersection points.
+   */
+  private addHoverIndicators( container: Node, standardSchedule: any[], extraSchedule: any[] ): void {
+    // Remove existing hover components
+    if ( this.cursorLine ) {
+      this.cursorLine.dispose();
+      this.cursorLine = null;
+    }
+    if ( this.principalCircle ) {
+      this.principalCircle.dispose();
+      this.principalCircle = null;
+    }
+    if ( this.interestCircle ) {
+      this.interestCircle.dispose();
+      this.interestCircle = null;
+    }
+    if ( this.principalTooltip ) {
+      this.principalTooltip.dispose();
+      this.principalTooltip = null;
+    }
+    if ( this.interestTooltip ) {
+      this.interestTooltip.dispose();
+      this.interestTooltip = null;
+    }
+    if ( this.chartHitArea ) {
+      this.chartHitArea.dispose();
+      this.chartHitArea = null;
+    }
+    if ( this.monthLabel ) {
+      this.monthLabel.dispose();
+      this.monthLabel = null;
+    }
+
+    // Use extra schedule if available, but keep both for tooltips
+    this.activeSchedule = extraSchedule.length > 0 ? extraSchedule : standardSchedule;
+    const showBothSchedules = extraSchedule.length > 0 && standardSchedule.length > 0;
+
+    if ( this.activeSchedule.length === 0 ) return;
+
+    // Get chart bounds - use view dimensions from chartTransform
+    const chartWidth = this.chartTransform.viewWidth;
+    const chartHeight = this.chartTransform.viewHeight;
+
+    // Create vertical cursor line (initially hidden)
+    this.cursorLine = new Line( 0, 0, 0, chartHeight, {
+      stroke: new Color( 100, 100, 100, 0.5 ),
+      lineWidth: 1,
+      visible: false
+    } );
+
+    // Create principal circle (green)
+    this.principalCircle = new Circle( 5, {
+      fill: new Color( 25, 169, 121 ),
+      stroke: 'white',
+      lineWidth: 2,
+      visible: false
+    } );
+
+    // Create interest circle (orange)
+    this.interestCircle = new Circle( 5, {
+      fill: new Color( 232, 116, 59 ),
+      stroke: 'white',
+      lineWidth: 2,
+      visible: false
+    } );
+
+    // Create tooltip for principal
+    const principalTooltipText = new Text( '', {
+      font: new PhetFont( 11 ),
+      fill: 'white'
+    } );
+    this.principalTooltip = new Panel( principalTooltipText, {
+      fill: new Color( 25, 169, 121, 0.9 ),
+      stroke: 'white',
+      lineWidth: 1,
+      cornerRadius: 4,
+      xMargin: 6,
+      yMargin: 4,
+      visible: false
+    } );
+
+    // Create tooltip for interest
+    const interestTooltipText = new Text( '', {
+      font: new PhetFont( 11 ),
+      fill: 'white'
+    } );
+    this.interestTooltip = new Panel( interestTooltipText, {
+      fill: new Color( 232, 116, 59, 0.9 ),
+      stroke: 'white',
+      lineWidth: 1,
+      cornerRadius: 4,
+      xMargin: 6,
+      yMargin: 4,
+      visible: false
+    } );
+
+    // Create month label that follows cursor along x-axis with white background
+    const monthLabelText = new Text( '', {
+      font: new PhetFont( { size: 11, weight: 'bold' } ),
+      fill: new Color( 100, 100, 100 )
+    } );
+    this.monthLabel = new Panel( monthLabelText, {
+      fill: 'white',
+      stroke: new Color( 200, 200, 200 ),
+      lineWidth: 1,
+      cornerRadius: 3,
+      xMargin: 5,
+      yMargin: 3,
+      visible: false
+    } );
+
+    // Create invisible hit area over entire chart
+    this.chartHitArea = new Rectangle( 0, 0, chartWidth, chartHeight, {
+      fill: Color.TRANSPARENT,
+      cursor: 'crosshair'
+    } );
+
+    // Add mouse move listener
+    this.chartHitArea.addInputListener( {
+      move: ( event: any ) => {
+        const localPoint = this.chartHitArea!.globalToLocalPoint( event.pointer.point );
+        
+        // Convert view x to model x (month number)
+        const modelX = this.chartTransform.viewToModelX( localPoint.x );
+        const monthIndex = Math.round( Math.max( 0, Math.min( modelX, this.activeSchedule.length - 1 ) ) );
+        
+        if ( monthIndex >= 0 && monthIndex < this.activeSchedule.length ) {
+          const entry = this.activeSchedule[ monthIndex ];
+          
+          // Also get standard schedule entry if showing both
+          const standardEntry = showBothSchedules && monthIndex < standardSchedule.length 
+            ? standardSchedule[ monthIndex ] 
+            : null;
+          
+          // Get view positions for this month's data
+          const principalPoint = this.chartTransform.modelToViewXY( monthIndex, entry.principal || 0 );
+          const interestPoint = this.chartTransform.modelToViewXY( monthIndex, entry.interest || 0 );
+          
+          // Update cursor line position
+          this.cursorLine!.setLine( localPoint.x, 0, localPoint.x, chartHeight );
+          this.cursorLine!.visible = true;
+          
+          // Update month label
+          monthLabelText.string = `Month ${entry.paymentNumber}`;
+          this.monthLabel!.centerX = localPoint.x;
+          this.monthLabel!.bottom = chartHeight - 5;
+          this.monthLabel!.visible = true;
+          
+          // Update principal circle and tooltip
+          this.principalCircle!.center = new Vector2( principalPoint.x, principalPoint.y );
+          this.principalCircle!.visible = true;
+          
+          // Build tooltip text showing both values if available
+          if ( standardEntry ) {
+            principalTooltipText.string = `Principal: $${formatNumber( entry.principal )} (was $${formatNumber( standardEntry.principal )})`;
+          } else {
+            principalTooltipText.string = `Principal: $${formatNumber( entry.principal )}`;
+          }
+          
+          // Position principal tooltip to the left, but clamp within bounds
+          const principalTooltipX = Math.max( 0, principalPoint.x - this.principalTooltip!.width - 8 );
+          this.principalTooltip!.x = principalTooltipX;
+          this.principalTooltip!.centerY = principalPoint.y;
+          this.principalTooltip!.visible = true;
+          
+          // Update interest circle and tooltip
+          this.interestCircle!.center = new Vector2( interestPoint.x, interestPoint.y );
+          this.interestCircle!.visible = true;
+          
+          // Build tooltip text showing both values if available
+          if ( standardEntry ) {
+            interestTooltipText.string = `Interest: $${formatNumber( entry.interest )} (was $${formatNumber( standardEntry.interest )})`;
+          } else {
+            interestTooltipText.string = `Interest: $${formatNumber( entry.interest )}`;
+          }
+          
+          // Position interest tooltip to the right, but clamp within bounds
+          const interestTooltipX = Math.min( chartWidth - this.interestTooltip!.width, interestPoint.x + 8 );
+          this.interestTooltip!.x = interestTooltipX;
+          this.interestTooltip!.centerY = interestPoint.y;
+          this.interestTooltip!.visible = true;
+        }
+      },
+      exit: () => {
+        // Hide all cursor components when mouse leaves chart
+        if ( this.cursorLine ) this.cursorLine.visible = false;
+        if ( this.principalCircle ) this.principalCircle.visible = false;
+        if ( this.interestCircle ) this.interestCircle.visible = false;
+        if ( this.principalTooltip ) this.principalTooltip.visible = false;
+        if ( this.interestTooltip ) this.interestTooltip.visible = false;
+        if ( this.monthLabel ) this.monthLabel.visible = false;
+      }
+    } );
+
+    // Add all components to container (order matters for z-index)
+    container.addChild( this.chartHitArea );
+    container.addChild( this.cursorLine );
+    container.addChild( this.principalCircle );
+    container.addChild( this.interestCircle );
+    container.addChild( this.principalTooltip );
+    container.addChild( this.interestTooltip );
+    container.addChild( this.monthLabel );
   }
 
   /**
