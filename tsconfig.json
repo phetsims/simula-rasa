@@ -8,6 +8,9 @@
   ],
   "references": [
     {
+      "path": "../bamboo"
+    },
+    {
       "path": "../perennial-alias/tsconfig/buildjson/tsconfig.json"
     }
   ]

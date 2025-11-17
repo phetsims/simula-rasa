@@ -20,14 +20,18 @@ import VBox from '../../../../scenery/js/layout/nodes/VBox.js';
 import HBox from '../../../../scenery/js/layout/nodes/HBox.js';
 import Text from '../../../../scenery/js/nodes/Text.js';
 import Node from '../../../../scenery/js/nodes/Node.js';
-import Path from '../../../../scenery/js/nodes/Path.js';
 import Rectangle from '../../../../scenery/js/nodes/Rectangle.js';
-import Line from '../../../../scenery/js/nodes/Line.js';
-import Shape from '../../../../kite/js/Shape.js';
-import LinearGradient from '../../../../scenery/js/util/LinearGradient.js';
 import Range from '../../../../dot/js/Range.js';
 import Color from '../../../../scenery/js/util/Color.js';
 import Dimension2 from '../../../../dot/js/Dimension2.js';
+import ChartTransform from '../../../../bamboo/js/ChartTransform.js';
+import ChartRectangle from '../../../../bamboo/js/ChartRectangle.js';
+import CanvasLinePlot from '../../../../bamboo/js/CanvasLinePlot.js';
+import ChartCanvasNode from '../../../../bamboo/js/ChartCanvasNode.js';
+import AxisLine from '../../../../bamboo/js/AxisLine.js';
+import GridLineSet from '../../../../bamboo/js/GridLineSet.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
 import { renderAmortizationTable, formatNumber, aggregateByYear } from '../../amortizationTable.js';
 import AmortizationCalcConstants from '../../common/AmortizationCalcConstants.js';
 import amortizationCalc from '../../amortizationCalc.js';
@@ -50,12 +54,19 @@ export default class AmortizationCalcScreenView extends ScreenView {
   private readonly disposeAmortizationCalcScreenView: () => void;
   private readonly resultsText: Text;
   private readonly comparisonText: Text;
-  private readonly standardGraphContainer: Node;
-  private readonly extraGraphContainer: Node;
-  private readonly standardTitleText: Text;
-  private readonly extraTitleText: Text;
-  private readonly standardInfoBox: VBox;
-  private readonly extraInfoBox: VBox;
+  private readonly combinedGraphContainer: Node;
+  private readonly graphTitleText: Text;
+  private readonly graphInfoBox: VBox;
+  private readonly extraPaymentControl: NumberControl;
+  private readonly extraPaymentPanel: Panel;
+  private readonly calculateButton: RectangularPushButton;
+  private readonly chartNode: Node;
+  private readonly chartTransform: ChartTransform;
+  private chartCanvasNode: ChartCanvasNode | null = null;
+  private standardInterestPlot: CanvasLinePlot | null = null;
+  private standardPrincipalPlot: CanvasLinePlot | null = null;
+  private extraInterestPlot: CanvasLinePlot | null = null;
+  private extraPrincipalPlot: CanvasLinePlot | null = null;
 
   public constructor( model: AmortizationCalcModel, providedOptions: AmortizationCalcScreenViewOptions ) {
 
@@ -92,7 +103,7 @@ export default class AmortizationCalcScreenView extends ScreenView {
       },
       titleNodeOptions: {
         font: LABEL_FONT,
-        maxWidth: 150
+        maxWidth: 200
       },
       layoutFunction: NumberControl.createLayoutFunction4(),
       tandem: options.tandem.createTandem( 'loanAmountControl' )
@@ -138,14 +149,84 @@ export default class AmortizationCalcScreenView extends ScreenView {
       },
       titleNodeOptions: {
         font: LABEL_FONT,
-        maxWidth: 150
+        maxWidth: 200
       },
       layoutFunction: NumberControl.createLayoutFunction4(),
       tandem: options.tandem.createTandem( 'interestRateControl' )
     } );
 
+    // Calculate Button
+    const calculateButtonText = new Text( 'Amortize!', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: 'white'
+    } );
+    
+    this.calculateButton = new RectangularPushButton( {
+      content: calculateButtonText,
+      baseColor: ACCENT_COLOR,
+      listener: () => {
+        model.computeSchedule();
+        // Unlock extra payment panel after first calculation
+        this.extraPaymentPanel.visible = true;
+      },
+      xMargin: 20,
+      yMargin: 10,
+      tandem: options.tandem.createTandem( 'calculateButton' )
+    } );
+
+    // Results summary text for monthly payment only
+    this.resultsText = new Text( '', {
+      font: RESULTS_FONT,
+      fill: 'black',
+      tandem: options.tandem.createTandem( 'resultsText' )
+    } );
+
+    // Comparison text showing impact of extra payments
+    this.comparisonText = new Text( '', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: new Color( '#0a8a0a' ),
+      maxWidth: CONTROL_PANEL_WIDTH - 40,
+      tandem: options.tandem.createTandem( 'comparisonText' )
+    } );
+
+    // Control Panel Content (vertical stack)
+    const controlPanelContent = new VBox( {
+      children: [
+        controlTitleText,
+        loanAmountControl,
+        termYearsControl,
+        interestRateControl,
+        this.calculateButton,
+        this.resultsText
+      ],
+      spacing: 15,
+      align: 'left'
+    } );
+
+    // Wrap control panel in Panel component
+    const controlPanel = new Panel( controlPanelContent, {
+      fill: PANEL_FILL,
+      stroke: new Color( '#ccc' ),
+      lineWidth: 2,
+      cornerRadius: 8,
+      xMargin: 20,
+      yMargin: 15,
+      tandem: options.tandem.createTandem( 'controlPanel' )
+    } );
+
+    // Position control panel at top left
+    controlPanel.left = AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN + 20;
+    controlPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
+    this.addChild( controlPanel );
+
+    // Create Extra Payment Panel (initially hidden/locked)
+    const extraPaymentTitleText = new Text( 'Discovery Mode', {
+      font: new PhetFont( { size: 16, weight: 'bold' } ),
+      fill: new Color( '#0a8a0a' )
+    } );
+
     // Create NumberControl for Extra Monthly Payment
-    const extraPaymentControl = new NumberControl( 'Extra Monthly Payment ($):', model.extraMonthlyPaymentProperty, new Range(0, 1000 ), {
+    this.extraPaymentControl = new NumberControl( 'Extra Monthly Payment ($):', model.extraMonthlyPaymentProperty, new Range( 0, 1000 ), {
       delta: 25,
       numberDisplayOptions: {
         decimalPlaces: 0,
@@ -162,344 +243,271 @@ export default class AmortizationCalcScreenView extends ScreenView {
       },
       titleNodeOptions: {
         font: LABEL_FONT,
-        maxWidth: 150
+        maxWidth: 200
       },
       layoutFunction: NumberControl.createLayoutFunction4(),
       tandem: options.tandem.createTandem( 'extraPaymentControl' )
     } );
 
-    // Calculate Button
-    const calculateButtonText = new Text( 'Amortize!', {
+    // Re-amortize Button
+    const reAmortizeButtonText = new Text( 'Re-amortize!', {
       font: new PhetFont( { size: 16, weight: 'bold' } ),
       fill: 'white'
     } );
     
-    const calculateButton = new RectangularPushButton( {
-      content: calculateButtonText,
-      baseColor: ACCENT_COLOR,
+    const reAmortizeButton = new RectangularPushButton( {
+      content: reAmortizeButtonText,
+      baseColor: new Color( '#0a8a0a' ),
       listener: () => {
         model.computeSchedule();
       },
       xMargin: 20,
       yMargin: 10,
-      tandem: options.tandem.createTandem( 'calculateButton' )
+      tandem: options.tandem.createTandem( 'reAmortizeButton' )
     } );
 
-    // Results summary text for monthly payment only
-    this.resultsText = new Text( '', {
-      font: RESULTS_FONT,
-      fill: 'black',
-      tandem: options.tandem.createTandem( 'resultsText' )
-    } );
-
-    // Comparison text showing impact of extra payments
-    this.comparisonText = new Text( '', {
-      font: new PhetFont( { size: 18, weight: 'bold' } ),
-      fill: new Color( '#0a8a0a' ),
-      maxWidth: CONTROL_PANEL_WIDTH - 40,
-      tandem: options.tandem.createTandem( 'comparisonText' )
-    } );
-
-    // Arrange controls horizontally
-    const controlsRow = new HBox( {
+    const extraPanelContent = new VBox( {
       children: [
-        loanAmountControl,
-        termYearsControl,
-        interestRateControl,
-        extraPaymentControl
-      ],
-      spacing: 20,
-      align: 'top'
-    } );
-
-    // Control Panel Content
-    const controlPanelContent = new VBox( {
-      children: [
-        controlTitleText,
-        controlsRow,
-        calculateButton,
-        this.resultsText,
+        extraPaymentTitleText,
+        this.extraPaymentControl,
+        reAmortizeButton,
         this.comparisonText
       ],
       spacing: 12,
-      align: 'center'
+      align: 'left'
     } );
 
-    // Wrap control panel in Panel component
-    const controlPanel = new Panel( controlPanelContent, {
+    this.extraPaymentPanel = new Panel( extraPanelContent, {
       fill: PANEL_FILL,
-      stroke: new Color( '#ccc' ),
+      stroke: new Color( '#0a8a0a' ),
       lineWidth: 2,
       cornerRadius: 8,
       xMargin: 20,
       yMargin: 15,
-      tandem: options.tandem.createTandem( 'controlPanel' )
+      visible: false, // Initially hidden until first calculation
+      tandem: options.tandem.createTandem( 'extraPaymentPanel' )
     } );
 
-    // Position control panel at top, full width
-    controlPanel.centerX = this.layoutBounds.centerX;
-    controlPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
-    this.addChild( controlPanel );
+    // Position extra payment panel below control panel
+    this.extraPaymentPanel.left = controlPanel.left;
+    this.extraPaymentPanel.top = controlPanel.bottom + 20;
+    this.addChild( this.extraPaymentPanel );
 
-    // Standard Scenario Graph Panel
-    this.standardTitleText = new Text( 'Standard Payments', {
+    // Combined Graph Panel
+    this.graphTitleText = new Text( 'Payment Breakdown', {
       font: new PhetFont( { size: 16, weight: 'bold' } ),
       fill: ACCENT_COLOR,
-      tandem: options.tandem.createTandem( 'standardTitleText' )
+      tandem: options.tandem.createTandem( 'graphTitleText' )
     } );
 
-    // Info box for standard scenario (will be updated with metrics)
-    this.standardInfoBox = new VBox( {
-      children: [ this.standardTitleText ],
+    // Info box for graph (will be updated with metrics)
+    this.graphInfoBox = new VBox( {
+      children: [ this.graphTitleText ],
       spacing: 5,
       align: 'center'
     } );
 
-    this.standardGraphContainer = new Node();
-    const standardGraphBackground = new Rectangle( 0, 0, 450, 300, {
+    this.combinedGraphContainer = new Node();
+    const combinedGraphBackground = new Rectangle( 0, 0, 600, 450, {
       fill: 'white',
       stroke: '#ddd',
       lineWidth: 1
     } );
-    this.standardGraphContainer.addChild( standardGraphBackground );
+    this.combinedGraphContainer.addChild( combinedGraphBackground );
 
-    const standardGraphContent = new VBox( {
-      children: [ this.standardInfoBox, this.standardGraphContainer ],
+    const combinedGraphContent = new VBox( {
+      children: [ this.graphInfoBox, this.combinedGraphContainer ],
       spacing: 8,
       align: 'center'
     } );
 
-    // Wrap standard graph in Panel component
-    const standardGraphPanel = new Panel( standardGraphContent, {
+    // Wrap combined graph in Panel component
+    const combinedGraphPanel = new Panel( combinedGraphContent, {
       fill: PANEL_FILL,
       stroke: new Color( '#ccc' ),
       lineWidth: 2,
       cornerRadius: 8,
       xMargin: 15,
       yMargin: 15,
-      tandem: options.tandem.createTandem( 'standardGraphPanel' )
+      tandem: options.tandem.createTandem( 'combinedGraphPanel' )
     } );
 
-    // Position standard graph at bottom left
-    standardGraphPanel.left = AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN + 20;
-    standardGraphPanel.bottom = this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN - 60;
-    this.addChild( standardGraphPanel );
+    // Position combined graph on right side
+    combinedGraphPanel.right = this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN - 20;
+    combinedGraphPanel.top = AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN + 10;
+    this.addChild( combinedGraphPanel );
 
-    // Extra Payment Scenario Graph Panel
-    this.extraTitleText = new Text( 'With Extra Payments', {
-      font: new PhetFont( { size: 16, weight: 'bold' } ),
-      fill: new Color( '#0a8a0a' ),
-      tandem: options.tandem.createTandem( 'extraTitleText' )
+    // Initialize chart transform and node for bamboo charts
+    const graphWidth = 600;
+    const graphHeight = 450;
+    const modelViewTransformRange = new Range( 0, 360 ); // months
+    const modelViewTransformDomain = new Range( 0, 5000 ); // dollars (will be updated dynamically)
+    
+    this.chartTransform = new ChartTransform( {
+      viewWidth: graphWidth,
+      viewHeight: graphHeight,
+      modelXRange: modelViewTransformRange,
+      modelYRange: modelViewTransformDomain
     } );
 
-    // Info box for extra scenario (will be updated with metrics)
-    this.extraInfoBox = new VBox( {
-      children: [ this.extraTitleText ],
-      spacing: 5,
-      align: 'center'
-    } );
+    this.chartNode = new Node();
 
-    this.extraGraphContainer = new Node();
-    const extraGraphBackground = new Rectangle( 0, 0, 450, 300, {
-      fill: 'white',
-      stroke: '#ddd',
-      lineWidth: 1
-    } );
-    this.extraGraphContainer.addChild( extraGraphBackground );
-
-    const extraGraphContent = new VBox( {
-      children: [ this.extraInfoBox, this.extraGraphContainer ],
-      spacing: 8,
-      align: 'center'
-    } );
-
-    // Wrap extra graph in Panel component
-    const extraGraphPanel = new Panel( extraGraphContent, {
-      fill: PANEL_FILL,
-      stroke: new Color( '#ccc' ),
-      lineWidth: 2,
-      cornerRadius: 8,
-      xMargin: 15,
-      yMargin: 15,
-      tandem: options.tandem.createTandem( 'extraGraphPanel' )
-    } );
-
-    // Position extra graph at bottom right, aligned with standard graph
-    extraGraphPanel.left = standardGraphPanel.right + 30;
-    extraGraphPanel.bottom = standardGraphPanel.bottom;
-    this.addChild( extraGraphPanel );
-
-    // Helper function to render animated area graph
-    const renderAreaGraph = ( container: Node, schedule: any[], graphWidth: number, graphHeight: number ): void => {
-      // Clear existing graph
+    // Helper function to render combined graph with bamboo charts
+    const renderCombinedGraph = ( container: Node, standardSchedule: any[], extraSchedule: any[], graphWidth: number, graphHeight: number ): void => {
+      // Clear existing plots
       container.removeAllChildren();
-      
-      // Add background
-      container.addChild( new Rectangle( 0, 0, graphWidth, graphHeight, {
-        fill: 'white',
-        stroke: '#ddd',
-        lineWidth: 1
-      } ) );
+      if ( this.chartCanvasNode ) {
+        this.chartCanvasNode.dispose();
+        this.chartCanvasNode = null;
+      }
+      if ( this.standardInterestPlot ) this.standardInterestPlot.dispose();
+      if ( this.standardPrincipalPlot ) this.standardPrincipalPlot.dispose();
+      if ( this.extraInterestPlot ) this.extraInterestPlot.dispose();
+      if ( this.extraPrincipalPlot ) this.extraPrincipalPlot.dispose();
+      this.standardInterestPlot = null;
+      this.standardPrincipalPlot = null;
+      this.extraInterestPlot = null;
+      this.extraPrincipalPlot = null;
 
-      if ( schedule.length === 0 ) return;
+      if ( standardSchedule.length === 0 ) return;
 
-      // Calculate totals for labels (AmortizationEntry uses 'principal' and 'interest' fields)
-      const totalPrincipal = schedule.reduce( ( sum, entry ) => sum + ( entry.principal || 0 ), 0 );
-      const totalInterest = schedule.reduce( ( sum, entry ) => sum + ( entry.interest || 0 ), 0 );
-      
-      // Use the loan term for x-axis (fixed scale in months)
+      // Determine max values for dynamic scaling
       const termYears = model.termYearsProperty.value;
       const termMonths = termYears * 12;
       
-      // Sample data points for performance - use every Nth month, plus first and last
-      const sampleRate = Math.max( 1, Math.floor( schedule.length / 60 ) ); // Max 60 points
-      const sampledIndices: number[] = [ 0 ]; // Always include first point
-      for ( let i = sampleRate; i < schedule.length - 1; i += sampleRate ) {
-        sampledIndices.push( i );
-      }
-      
-      // Include last point only if it's not an anomalous final payment
-      // (Final payment is often very small, causing visual artifacts)
-      if ( schedule.length > 2 ) {
-        const lastIdx = schedule.length - 1;
-        const secondLastIdx = schedule.length - 2;
-        const lastPrincipal = schedule[ lastIdx ].principal || 0;
-        const secondLastPrincipal = schedule[ secondLastIdx ].principal || 0;
-        
-        // Only include last point if it's similar to second-to-last (not a tiny final payment)
-        if ( lastPrincipal > secondLastPrincipal * 0.5 ) {
-          sampledIndices.push( lastIdx );
-        } else if ( !sampledIndices.includes( secondLastIdx ) ) {
-          // Use second-to-last instead
-          sampledIndices.push( secondLastIdx );
-        }
-      }
-      
-      // Find max amount for scaling
-      const amounts = schedule.map( entry => {
-        const principal = entry.principal || 0;
-        const interest = entry.interest || 0;
-        return Math.max( principal, interest );
-      } );
-      const maxAmount = Math.max( ...amounts, 1 );
-      
-      const xScale = ( graphWidth - 70 ) / termMonths;
-      const yScale = ( graphHeight - 50 ) / maxAmount;
-      const padding = 40;
-
-      // Create interest line path (orange, decreasing over time)
-      const interestShape = new Shape();
-      if ( sampledIndices.length > 0 ) {
-        const firstIdx = sampledIndices[ 0 ];
-        const startX = padding + ( firstIdx + 0.5 ) * xScale;
-        const startY = graphHeight - padding - schedule[ firstIdx ].interest * yScale;
-        interestShape.moveTo( startX, startY );
-        
-        for ( let i = 1; i < sampledIndices.length; i++ ) {
-          const idx = sampledIndices[ i ];
-          const x = padding + ( idx + 0.5 ) * xScale;
-          const y = graphHeight - padding - schedule[ idx ].interest * yScale;
-          interestShape.lineTo( x, y );
-        }
-      }
-
-      const interestPath = new Path( interestShape, {
-        stroke: '#e8743b',
-        lineWidth: 2
-      } );
-      container.addChild( interestPath );
-
-      // Create principal line path (green, increasing over time)
-      const principalShape = new Shape();
-      if ( sampledIndices.length > 0 ) {
-        const firstIdx = sampledIndices[ 0 ];
-        const startX = padding + ( firstIdx + 0.5 ) * xScale;
-        const startY = graphHeight - padding - schedule[ firstIdx ].principal * yScale;
-        principalShape.moveTo( startX, startY );
-        
-        for ( let i = 1; i < sampledIndices.length; i++ ) {
-          const idx = sampledIndices[ i ];
-          const x = padding + ( idx + 0.5 ) * xScale;
-          const y = graphHeight - padding - schedule[ idx ].principal * yScale;
-          principalShape.lineTo( x, y );
-        }
-      }
-
-      const principalPath = new Path( principalShape, {
-        stroke: '#19a979',
-        lineWidth: 2
-      } );
-      container.addChild( principalPath );
-
-      // Add axis lines
-      const xAxis = new Line( padding, graphHeight - padding, graphWidth - padding, graphHeight - padding, {
-        stroke: '#333',
-        lineWidth: 2
-      } );
-      const yAxis = new Line( padding, padding, padding, graphHeight - padding, {
-        stroke: '#333',
-        lineWidth: 2
-      } );
-      container.addChild( xAxis );
-      container.addChild( yAxis );
-      
-      // Add year markers on x-axis - positioned at 12-month intervals
-      for ( let year = 1; year <= termYears; year++ ) {
-        const monthNumber = year * 12;
-        const x = padding + ( monthNumber - 0.5 ) * xScale;
-        
-        // Show year labels at reasonable intervals
-        if ( year === 1 || year === termYears || year % 5 === 0 ) {
-          const yearLabel = new Text( `${year}`, {
-            font: new PhetFont( 9 ),
-            fill: '#333',
-            centerX: x,
-            top: graphHeight - padding + 5
-          } );
-          container.addChild( yearLabel );
-        }
-        
-        // Add tick marks for every year
-        const tickMark = new Line( x, graphHeight - padding, x, graphHeight - padding + 3, {
-          stroke: '#333',
-          lineWidth: 1
+      // Find max payment amount across all schedules for y-axis scaling
+      let maxPayment = 100;
+      [ standardSchedule, extraSchedule ].forEach( schedule => {
+        schedule.forEach( entry => {
+          maxPayment = Math.max( maxPayment, entry.principal || 0, entry.interest || 0 );
         } );
-        container.addChild( tickMark );
+      } );
+
+      // Update chart transform with current data ranges
+      this.chartTransform.setModelXRange( new Range( 0, termMonths ) );
+      this.chartTransform.setModelYRange( new Range( 0, maxPayment * 1.1 ) ); // 10% padding
+
+      // Clear and rebuild chart
+      this.chartNode.removeAllChildren();
+
+      // Add chart rectangle (boundary)
+      const chartRectangle = new ChartRectangle( this.chartTransform, {
+        fill: 'white',
+        stroke: new Color( 220, 220, 220 ),
+        lineWidth: 1
+      } );
+      this.chartNode.addChild( chartRectangle );
+
+      // Add grid lines
+      const gridLineSet = new GridLineSet( this.chartTransform, Orientation.HORIZONTAL, 1000, {
+        stroke: new Color( 230, 230, 230 ),
+        lineWidth: 0.5
+      } );
+      this.chartNode.addChild( gridLineSet );
+
+      // Add axes
+      const xAxisLine = new AxisLine( this.chartTransform, Orientation.HORIZONTAL, {
+        stroke: new Color( 51, 51, 51 ),
+        lineWidth: 2
+      } );
+      const yAxisLine = new AxisLine( this.chartTransform, Orientation.VERTICAL, {
+        stroke: new Color( 51, 51, 51 ),
+        lineWidth: 2
+      } );
+      this.chartNode.addChild( xAxisLine );
+      this.chartNode.addChild( yAxisLine );
+
+      // Helper to convert schedule to Vector2 data points
+      const scheduleToDataPoints = ( schedule: any[], field: 'principal' | 'interest' ): Vector2[] => {
+        return schedule.map( ( entry, index ) => new Vector2( index, entry[ field ] || 0 ) );
+      };
+
+      // Create standard interest plot (orange)
+      const standardInterestData = scheduleToDataPoints( standardSchedule, 'interest' );
+      this.standardInterestPlot = new CanvasLinePlot( this.chartTransform, standardInterestData, {
+        stroke: new Color( 232, 116, 59 ), // #e8743b
+        lineWidth: extraSchedule.length > 0 ? 1.5 : 2,
+        lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
+      } );
+
+      // Create standard principal plot (green)
+      const standardPrincipalData = scheduleToDataPoints( standardSchedule, 'principal' );
+      this.standardPrincipalPlot = new CanvasLinePlot( this.chartTransform, standardPrincipalData, {
+        stroke: new Color( 25, 169, 121 ), // #19a979
+        lineWidth: extraSchedule.length > 0 ? 1.5 : 2,
+        lineDash: extraSchedule.length > 0 ? [ 5, 3 ] : []
+      } );
+
+      // Collect all painters for ChartCanvasNode
+      const painters = [ this.standardInterestPlot, this.standardPrincipalPlot ];
+
+      // If extra schedule exists, draw those lines (solid, more prominent)
+      if ( extraSchedule.length > 0 ) {
+        const extraInterestData = scheduleToDataPoints( extraSchedule, 'interest' );
+        this.extraInterestPlot = new CanvasLinePlot( this.chartTransform, extraInterestData, {
+          stroke: new Color( 232, 116, 59 ), // #e8743b
+          lineWidth: 3
+        } );
+        painters.push( this.extraInterestPlot );
+
+        const extraPrincipalData = scheduleToDataPoints( extraSchedule, 'principal' );
+        this.extraPrincipalPlot = new CanvasLinePlot( this.chartTransform, extraPrincipalData, {
+          stroke: new Color( 25, 169, 121 ), // #19a979
+          lineWidth: 3
+        } );
+        painters.push( this.extraPrincipalPlot );
       }
 
-      // Add labels
+      // Create ChartCanvasNode to render all the plots
+      this.chartCanvasNode = new ChartCanvasNode( this.chartTransform, painters );
+      this.chartNode.addChild( this.chartCanvasNode );
+
+      // Add year labels on x-axis
+      for ( let year = 1; year <= termYears; year++ ) {
+        if ( year === 1 || year === termYears || year % 5 === 0 ) {
+          const monthNumber = year * 12;
+          const viewPoint = this.chartTransform.modelToViewXY( monthNumber, 0 );
+          const yearLabel = new Text( `Year ${year}`, {
+            font: new PhetFont( 10 ),
+            fill: '#333',
+            centerX: viewPoint.x,
+            top: viewPoint.y + 8
+          } );
+          this.chartNode.addChild( yearLabel );
+        }
+      }
+
+      // Add y-axis label
+      const yLabel = new Text( 'Monthly Payment ($)', {
+        font: new PhetFont( { size: 11, weight: 'bold' } ),
+        fill: '#333',
+        rotation: -Math.PI / 2,
+        right: this.chartTransform.modelToViewXY( 0, 0 ).x - 15,
+        centerY: graphHeight / 2
+      } );
+      this.chartNode.addChild( yLabel );
+
+      // Add legend
       const legendText = new Text( 'Green: Principal | Orange: Interest', {
         font: new PhetFont( 11 ),
         fill: '#666',
         centerX: graphWidth / 2,
         top: 10
       } );
-      container.addChild( legendText );
+      this.chartNode.addChild( legendText );
 
-      // Add final value labels
-      const finalPrincipalText = new Text( `Principal: $${formatNumber( totalPrincipal )}`, {
-        font: new PhetFont( { size: 12, weight: 'bold' } ),
-        fill: '#19a979',
-        right: graphWidth - padding - 5,
-        top: padding + 25
-      } );
-      container.addChild( finalPrincipalText );
+      if ( extraSchedule.length > 0 ) {
+        const dashedLegendText = new Text( 'Dashed: Standard | Solid: With Extra Payments', {
+          font: new PhetFont( 10 ),
+          fill: '#666',
+          centerX: graphWidth / 2,
+          top: 28
+        } );
+        this.chartNode.addChild( dashedLegendText );
+      }
 
-      const finalInterestText = new Text( `Interest: $${formatNumber( totalInterest )}`, {
-        font: new PhetFont( { size: 12, weight: 'bold' } ),
-        fill: '#e8743b',
-        right: graphWidth - padding - 5,
-        top: padding + 45
-      } );
-      container.addChild( finalInterestText );
-
-      const totalText = new Text( `Total: $${formatNumber( totalPrincipal + totalInterest )}`, {
-        font: new PhetFont( { size: 13, weight: 'bold' } ),
-        fill: '#333',
-        right: graphWidth - padding - 5,
-        top: padding + 65
-      } );
-      container.addChild( totalText );
+      // Add the chart node to the container
+      container.addChild( this.chartNode );
     };
 
     // View update function - observes model and updates UI
@@ -519,9 +527,12 @@ export default class AmortizationCalcScreenView extends ScreenView {
       // Update results text to show only monthly payment
       this.resultsText.string = `Monthly Payment: $${formatNumber( monthlyPayment )}`;
 
-      // Update standard info box with compact metrics
-      this.standardTitleText.string = 'Standard Payments';
-      const standardMonthsText = new Text( `${schedule.length} months`, {
+      // Update info box with metrics
+      this.graphInfoBox.removeAllChildren();
+      this.graphInfoBox.addChild( this.graphTitleText );
+      
+      // Standard scenario metrics
+      const standardMonthsText = new Text( `Standard: ${schedule.length} months`, {
         font: new PhetFont( 11 ),
         fill: '#666'
       } );
@@ -534,36 +545,19 @@ export default class AmortizationCalcScreenView extends ScreenView {
         fill: '#e8743b'
       } );
       
-      this.standardInfoBox.removeAllChildren();
-      this.standardInfoBox.addChild( this.standardTitleText );
       const standardMetrics = new HBox( {
         children: [ standardMonthsText, standardTotalText, standardInterestText ],
         spacing: 15
       } );
-      this.standardInfoBox.addChild( standardMetrics );
-
-      // Update comparison text if extra payments are being made
-      if ( extraPayment > 0 && model.scheduleWithExtraArray.length > 0 ) {
-        const monthsSaved = model.monthsSavedProperty.value;
-        const interestSaved = model.interestSavedProperty.value;
-        const yearsSaved = ( monthsSaved / 12 ).toFixed( 1 );
-        this.comparisonText.string = `🎉 Discovery! By paying $${formatNumber( extraPayment )} extra each month:\n• Pay off ${yearsSaved} years earlier!\n• Save $${formatNumber( interestSaved )} in interest!`;
-      } else {
-        this.comparisonText.string = extraPayment === 0 ? '💡 Try adding an extra monthly payment to see the impact!' : '';
-      }
-
-      // Render standard scenario graph
-      renderAreaGraph( this.standardGraphContainer, schedule, 450, 300 );
-
-      // Render extra payment scenario graph
+      this.graphInfoBox.addChild( standardMetrics );
+      
+      // Extra scenario metrics (if applicable)
       const scheduleWithExtra = model.scheduleWithExtraArray.slice();
       if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
         const totalPaidWithExtra = model.totalPaidWithExtraProperty.value;
         const totalInterestWithExtra = model.totalInterestWithExtraProperty.value;
         
-        // Update extra info box with compact metrics
-        this.extraTitleText.string = 'With Extra Payments';
-        const extraMonthsText = new Text( `${scheduleWithExtra.length} months`, {
+        const extraMonthsText = new Text( `With Extra: ${scheduleWithExtra.length} months`, {
           font: new PhetFont( 11 ),
           fill: '#666'
         } );
@@ -576,34 +570,25 @@ export default class AmortizationCalcScreenView extends ScreenView {
           fill: '#19a979'
         } );
         
-        this.extraInfoBox.removeAllChildren();
-        this.extraInfoBox.addChild( this.extraTitleText );
         const extraMetrics = new HBox( {
           children: [ extraMonthsText, extraTotalText, extraInterestText ],
           spacing: 15
         } );
-        this.extraInfoBox.addChild( extraMetrics );
-        
-        renderAreaGraph( this.extraGraphContainer, scheduleWithExtra, 450, 300 );
-      } else {
-        // Clear extra graph if no extra payment
-        this.extraTitleText.string = 'With Extra Payments';
-        this.extraInfoBox.removeAllChildren();
-        this.extraInfoBox.addChild( this.extraTitleText );
-        this.extraGraphContainer.removeAllChildren();
-        this.extraGraphContainer.addChild( new Rectangle( 0, 0, 450, 300, {
-          fill: 'white',
-          stroke: '#ddd',
-          lineWidth: 1
-        } ) );
-        const placeholderText = new Text( 'Add extra payment to see comparison', {
-          font: LABEL_FONT,
-          fill: '#999',
-          centerX: 225,
-          centerY: 150
-        } );
-        this.extraGraphContainer.addChild( placeholderText );
+        this.graphInfoBox.addChild( extraMetrics );
       }
+
+      // Update comparison text if extra payments are being made
+      if ( extraPayment > 0 && scheduleWithExtra.length > 0 ) {
+        const monthsSaved = model.monthsSavedProperty.value;
+        const interestSaved = model.interestSavedProperty.value;
+        const yearsSaved = ( monthsSaved / 12 ).toFixed( 1 );
+        this.comparisonText.string = `🎉 Discovery! By paying $${formatNumber( extraPayment )} extra each month:\n• Pay off ${yearsSaved} years earlier!\n• Save $${formatNumber( interestSaved )} in interest!`;
+      } else {
+        this.comparisonText.string = extraPayment === 0 ? '💡 Try adding an extra monthly payment to see the impact!' : '';
+      }
+
+      // Render combined graph with both scenarios
+      renderCombinedGraph( this.combinedGraphContainer, schedule, scheduleWithExtra, 600, 450 );
     };
 
     // Listen to model changes - need to watch BOTH schedules
@@ -613,14 +598,24 @@ export default class AmortizationCalcScreenView extends ScreenView {
     model.scheduleWithExtraArray.elementAddedEmitter.addListener( scheduleListener );
     model.scheduleWithExtraArray.elementRemovedEmitter.addListener( scheduleListener );
 
-    // Initial render
-    updateView();
+    // Don't render initially - wait for user to click Amortize
 
     // Reset button
     const resetAllButton = new ResetAllButton( {
       listener: () => {
         model.reset();
-        updateView();
+        // Clear the graph
+        this.combinedGraphContainer.removeAllChildren();
+        this.combinedGraphContainer.addChild( new Rectangle( 0, 0, 600, 450, {
+          fill: 'white',
+          stroke: '#ddd',
+          lineWidth: 1
+        } ) );
+        this.resultsText.string = '';
+        this.comparisonText.string = '';
+        this.graphInfoBox.removeAllChildren();
+        this.graphInfoBox.addChild( this.graphTitleText );
+        this.extraPaymentPanel.visible = false;
       },
       right: this.layoutBounds.maxX - AmortizationCalcConstants.SCREEN_VIEW_X_MARGIN,
       bottom: this.layoutBounds.maxY - AmortizationCalcConstants.SCREEN_VIEW_Y_MARGIN,
@@ -635,14 +630,15 @@ export default class AmortizationCalcScreenView extends ScreenView {
       model.scheduleWithExtraArray.elementAddedEmitter.removeListener( scheduleListener );
       model.scheduleWithExtraArray.elementRemovedEmitter.removeListener( scheduleListener );
       controlPanel.dispose();
-      standardGraphPanel.dispose();
-      extraGraphPanel.dispose();
+      this.extraPaymentPanel.dispose();
+      combinedGraphPanel.dispose();
       resetAllButton.dispose();
       loanAmountControl.dispose();
       termYearsRadioButtonGroup.dispose();
       interestRateControl.dispose();
-      calculateButton.dispose();
-      extraPaymentControl.dispose();
+      this.calculateButton.dispose();
+      this.extraPaymentControl.dispose();
+      reAmortizeButton.dispose();
     };
   }
 

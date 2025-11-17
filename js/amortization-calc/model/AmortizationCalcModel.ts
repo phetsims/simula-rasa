@@ -117,8 +117,7 @@ export default class AmortizationCalcModel implements TModel {
 
     this.scheduleWithExtraArray = createObservableArray<AmortizationEntry>();
 
-    // Compute initial schedule
-    this.computeSchedule();
+    // Don't compute initial schedule - wait for user to click Amortize
   }
 
   /**
@@ -150,8 +149,8 @@ export default class AmortizationCalcModel implements TModel {
     // Update computed properties for standard scenario
     const monthlyPayment = schedule.length > 0 ? schedule[ 0 ].payment : 0;
     const totalInterest = schedule.reduce( ( sum, entry ) => sum + entry.interest, 0 );
-    const numberOfPayments = years * 12;
-    const totalPaid = monthlyPayment * numberOfPayments;
+    const totalPrincipal = schedule.reduce( ( sum, entry ) => sum + entry.principal, 0 );
+    const totalPaid = totalPrincipal + totalInterest;
 
     this.monthlyPaymentProperty.value = monthlyPayment;
     this.totalInterestProperty.value = totalInterest;
