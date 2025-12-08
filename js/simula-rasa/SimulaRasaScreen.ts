@@ -10,7 +10,7 @@ import Screen, { ScreenOptions } from '../../../joist/js/Screen.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import SimulaRasaColors from '../common/SimulaRasaColors.js';
 import simulaRasa from '../simulaRasa.js';
-import SimulaRasaStrings from '../SimulaRasaStrings.js';
+import SimulaRasaFluent from '../SimulaRasaFluent.js';
 import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
 
@@ -25,7 +25,7 @@ export default class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasa
   public constructor( providedOptions: SimulaRasaScreenOptions ) {
 
     const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>()( {
-      name: SimulaRasaStrings.screen.nameStringProperty,
+      name: SimulaRasaFluent.screen.nameStringProperty,
 
       //TODO add default values for optional SelfOptions here
 
