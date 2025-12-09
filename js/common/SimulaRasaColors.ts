@@ -17,13 +17,17 @@
 import ProfileColorProperty from '../../../scenery/js/util/ProfileColorProperty.js';
 import simulaRasa from '../simulaRasa.js';
 
-const SimulaRasaColors = {
+export default class SimulaRasaColors {
 
-  // Background color for screens in this sim
-  screenBackgroundColorProperty: new ProfileColorProperty( simulaRasa, 'screenBackgroundColor', {
+  private constructor() {
+    // Not intended for instantiation.
+  }
+
+  public static readonly screenBackgroundColorProperty = new ProfileColorProperty(
+    simulaRasa, 'screenBackgroundColor', {
     default: 'white'
-  } )
-};
+  } );
+}
+
 
 simulaRasa.register( 'SimulaRasaColors', SimulaRasaColors );
-export default SimulaRasaColors;

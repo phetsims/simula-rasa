@@ -1,20 +1,21 @@
 // Copyright 2019-2022, University of Colorado Boulder
 
 /**
- * Constants used throughout this simulation.
+ * SimulaRasaConstants is the set of constants used throughout the 'Simula Rasa' simulation.
  *
  * @author {{AUTHOR}}
  */
 
 import simulaRasa from '../simulaRasa.js';
 
-const SimulaRasaConstants = {
+export default class SimulaRasaConstants {
 
-  SCREEN_VIEW_X_MARGIN: 15,
-  SCREEN_VIEW_Y_MARGIN: 15
+  private constructor() {
+    // Not intended for instantiation.
+  }
 
-  //TODO
-};
+  public static readonly SCREEN_VIEW_X_MARGIN = 15;
+  public static readonly SCREEN_VIEW_Y_MARGIN = 15;
+}
 
 simulaRasa.register( 'SimulaRasaConstants', SimulaRasaConstants );
-export default SimulaRasaConstants;
