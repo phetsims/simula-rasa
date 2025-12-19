@@ -6,6 +6,7 @@
 /* @formatter:off */
 
 import FluentContainer from '../../chipper/js/browser/FluentContainer.js';
+import FluentLibrary from '../../chipper/js/browser-and-node/FluentLibrary.js';
 import simulaRasa from './simulaRasa.js';
 import SimulaRasaStrings from './SimulaRasaStrings.js';
 
@@ -28,7 +29,7 @@ const addToMapIfDefined = ( key: string, path: string ) => {
 const createFluentFile = (): string => {
   let ftl = '';
   for (const [key, stringProperty] of fluentKeyToStringPropertyMap.entries()) {
-    ftl += `${key} = ${stringProperty.value.replace('\n','\n ')}\n`;
+    ftl += `${key} = ${FluentLibrary.formatMultilineForFtl( stringProperty.value )}\n`;
   }
   return ftl;
 };
