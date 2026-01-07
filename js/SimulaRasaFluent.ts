@@ -5,8 +5,8 @@
 /* eslint-disable */
 /* @formatter:off */
 
-import FluentContainer from '../../chipper/js/browser/FluentContainer.js';
 import FluentLibrary from '../../chipper/js/browser-and-node/FluentLibrary.js';
+import FluentContainer from '../../chipper/js/browser/FluentContainer.js';
 import simulaRasa from './simulaRasa.js';
 import SimulaRasaStrings from './SimulaRasaStrings.js';
 
