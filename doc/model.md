@@ -1,1 +1,1 @@
-TODO model description
+NOTE model description

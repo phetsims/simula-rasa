@@ -1,1 +1,1 @@
-TODO implementation overview
+NOTE implementation overview
