@@ -1,7 +1,7 @@
 // Copyright 2014-2025, University of Colorado Boulder
 
 /**
- * NOTE Describe this class and its responsibilities. https://github.com/phetsims/{{REPO}}/issues/1
+ * NOTE Describe this class and its responsibilities
  *
  * @author {{AUTHOR}}
  */
@@ -15,7 +15,7 @@ import SimulaRasaModel from './model/SimulaRasaModel.js';
 import SimulaRasaScreenView from './view/SimulaRasaScreenView.js';
 
 type SelfOptions = {
-  //NOTE add options that are specific to SimulaRasaScreen here. https://github.com/phetsims/{{REPO}}/issues/1
+  //NOTE add options that are specific to SimulaRasaScreen here
 };
 
 type SimulaRasaScreenOptions = SelfOptions & ScreenOptions;
@@ -27,9 +27,9 @@ export default class SimulaRasaScreen extends Screen<SimulaRasaModel, SimulaRasa
     const options = optionize<SimulaRasaScreenOptions, SelfOptions, ScreenOptions>()( {
       name: SimulaRasaFluent.screen.nameStringProperty,
 
-      //NOTE add default values for optional SelfOptions here. https://github.com/phetsims/{{REPO}}/issues/1
+      //NOTE add default values for optional SelfOptions here
 
-      //NOTE add default values for optional ScreenOptions here. https://github.com/phetsims/{{REPO}}/issues/1
+      //NOTE add default values for optional ScreenOptions here
       backgroundColorProperty: SimulaRasaColors.screenBackgroundColorProperty
     }, providedOptions );
 

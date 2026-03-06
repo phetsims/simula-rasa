@@ -1,7 +1,7 @@
 // Copyright 2014-2024, University of Colorado Boulder
 
 /**
- * NOTE Describe this class and its responsibilities. https://github.com/phetsims/{{REPO}}/issues/1
+ * NOTE Describe this class and its responsibilities
  *
  * @author {{AUTHOR}}
  */
@@ -12,7 +12,7 @@ import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import simulaRasa from '../../simulaRasa.js';
 
 type SelfOptions = {
-  //NOTE add options that are specific to SimulaRasaModel here. https://github.com/phetsims/{{REPO}}/issues/1
+  //NOTE add options that are specific to SimulaRasaModel here
 };
 
 type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 'tandem'>;
@@ -20,14 +20,14 @@ type SimulaRasaModelOptions = SelfOptions & PickRequired<PhetioObjectOptions, 't
 export default class SimulaRasaModel implements TModel {
 
   public constructor( providedOptions: SimulaRasaModelOptions ) {
-    //NOTE. https://github.com/phetsims/{{REPO}}/issues/1
+    //NOTE
   }
 
   /**
    * Resets the model.
    */
   public reset(): void {
-    //NOTE. https://github.com/phetsims/{{REPO}}/issues/1
+    //NOTE
   }
 
   /**
@@ -35,7 +35,7 @@ export default class SimulaRasaModel implements TModel {
    * @param dt - time step, in seconds
    */
   public step( dt: number ): void {
-    //NOTE. https://github.com/phetsims/{{REPO}}/issues/1
+    //NOTE
   }
 }
 

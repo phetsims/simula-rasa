@@ -12,7 +12,7 @@ import { QueryStringMachine } from '../../../query-string-machine/js/QueryString
 import simulaRasa from '../simulaRasa.js';
 
 const SimulaRasaQueryParameters = QueryStringMachine.getAll( {
-  //NOTE add schemas for query parameters. https://github.com/phetsims/{{REPO}}/issues/1
+  //NOTE add schemas for query parameters
 } );
 
 simulaRasa.register( 'SimulaRasaQueryParameters', SimulaRasaQueryParameters );

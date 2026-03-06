@@ -1,7 +1,7 @@
 // Copyright 2014-2025, University of Colorado Boulder
 
 /**
- * NOTE Describe this class and its responsibilities. https://github.com/phetsims/{{REPO}}/issues/1
+ * NOTE Describe this class and its responsibilities
  *
  * @author {{AUTHOR}}
  */
@@ -14,7 +14,7 @@ import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
 
 type SelfOptions = {
- //NOTE add options that are specific to SimulaRasaScreenView here. https://github.com/phetsims/{{REPO}}/issues/1
+ //NOTE add options that are specific to SimulaRasaScreenView here
 };
 
 type SimulaRasaScreenViewOptions = SelfOptions & ScreenViewOptions;
@@ -25,9 +25,9 @@ export default class SimulaRasaScreenView extends ScreenView {
 
     const options = optionize<SimulaRasaScreenViewOptions, SelfOptions, ScreenViewOptions>()( {
 
-      //NOTE add default values for optional SelfOptions here. https://github.com/phetsims/{{REPO}}/issues/1
+      //NOTE add default values for optional SelfOptions here
 
-      //NOTE add default values for optional ScreenViewOptions here. https://github.com/phetsims/{{REPO}}/issues/1
+      //NOTE add default values for optional ScreenViewOptions here
     }, providedOptions );
 
     super( options );
@@ -48,7 +48,7 @@ export default class SimulaRasaScreenView extends ScreenView {
    * Resets the view.
    */
   public reset(): void {
-    //NOTE. https://github.com/phetsims/{{REPO}}/issues/1
+    //NOTE
   }
 
   /**
@@ -56,7 +56,7 @@ export default class SimulaRasaScreenView extends ScreenView {
    * @param dt - time step, in seconds
    */
   public override step( dt: number ): void {
-    //NOTE. https://github.com/phetsims/{{REPO}}/issues/1
+    //NOTE
   }
 }
 
