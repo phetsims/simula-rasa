@@ -6,8 +6,6 @@
  * @author {{AUTHOR}}
  */
 
-import simulaRasa from '../simulaRasa.js';
-
 export default class SimulaRasaConstants {
 
   private constructor() {
@@ -17,5 +15,3 @@ export default class SimulaRasaConstants {
   public static readonly SCREEN_VIEW_X_MARGIN = 15;
   public static readonly SCREEN_VIEW_Y_MARGIN = 15;
 }
-
-simulaRasa.register( 'SimulaRasaConstants', SimulaRasaConstants );

@@ -22,6 +22,4 @@ type StringsType = {
 
 const SimulaRasaStrings = getStringModule( 'SIMULA_RASA' ) as StringsType;
 
-simulaRasa.register( 'SimulaRasaStrings', SimulaRasaStrings );
-
 export default SimulaRasaStrings;

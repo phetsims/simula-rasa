@@ -10,7 +10,6 @@ import ScreenView, { ScreenViewOptions } from '../../../../joist/js/ScreenView.j
 import optionize from '../../../../phet-core/js/optionize.js';
 import ResetAllButton from '../../../../scenery-phet/js/buttons/ResetAllButton.js';
 import SimulaRasaConstants from '../../common/SimulaRasaConstants.js';
-import simulaRasa from '../../simulaRasa.js';
 import SimulaRasaModel from '../model/SimulaRasaModel.js';
 
 type SelfOptions = {
@@ -59,5 +58,3 @@ export default class SimulaRasaScreenView extends ScreenView {
     //NOTE
   }
 }
-
-simulaRasa.register( 'SimulaRasaScreenView', SimulaRasaScreenView );

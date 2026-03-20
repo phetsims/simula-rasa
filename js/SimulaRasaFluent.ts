@@ -46,5 +46,3 @@ const SimulaRasaFluent = {
 };
 
 export default SimulaRasaFluent;
-
-simulaRasa.register('SimulaRasaFluent', SimulaRasaFluent);

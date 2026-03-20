@@ -28,6 +28,3 @@ export default class SimulaRasaColors {
     default: 'white'
   } );
 }
-
-
-simulaRasa.register( 'SimulaRasaColors', SimulaRasaColors );
