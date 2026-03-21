@@ -1,4 +1,4 @@
-// Copyright 2019-2025, University of Colorado Boulder
+// Copyright 2019-2026, University of Colorado Boulder
 
 /**
  * SimulaRasaConstants is the set of constants used throughout the 'Simula Rasa' simulation.
